@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,24 +30,24 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     RoleRepository roleRepository;
-    PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     public UserResponse createUser(CreateUserRequest request) {
         if(userRepository.existsByUsername(request.getUsername()))
-            throw new RuntimeException("User already exists");
+            throw new AppException(ErrorCode.USER_EXISTED);
 
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         HashSet<String> roles = new HashSet<>();
-        roles.add(Role.ADMIN.name());
+        roles.add(Role.USER.name());
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public UserResponse getUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         return userMapper.toUserResponse(user);
     }
@@ -70,7 +71,7 @@ public class UserService {
 
     public UserResponse updateUser(String userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         userMapper.updateUser(user, request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));

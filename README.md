@@ -25,3 +25,21 @@
 
 ### Dự kiến tương lai
 * Hoàn thiện login, logout trong tuần tới
+
+## 30/03/2025
+### Đã làm được 
+* Code xong phần ConFigure cho code
+  * Điều chỉnh việc thêm tài khoản admin khi chưa có
+  * Xử lý các request chưa được xác thực
+  * Hoàn thiện phần login/logout
+* Hoàn thiện phần controller, phần code đã ổn định với việc quản lý tài khoản
+
+### Chưa làm được
+* Trong quá trình chạy lại để kiểm tra, lại phát sinh lỗi 
+  * Mặc dù run được, nhưng các request đều bị lỗi Unauthorized!
+* Nguyên nhân vẫn đang tìm kiếm, nhưng đây có thể là lỗi về mặt phân quyền
+
+### Dự kiến tương lai
+* Sửa lỗi đang mắc phải
+* Phát triển tiếp phần Front End
+* Tìm hiểu RAG
