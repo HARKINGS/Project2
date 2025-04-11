@@ -52,7 +52,11 @@
 * Các vai trò user, staff, admin đều có quyền thực hiện 1 số chức năng chung, admin sẽ sở hữu nhiều quyền nhất, rồi tới staff, cuối cùng là user
 * Chạy thử đã ổn định các chức năng, API chính liên quan đến quản lý tài khoản, vai trò, quyền
 ### Chưa làm được 
+* Hiểu sâu về RAG
+* Code front end
 ### Dự kiến tương lai
+* Tìm hiểu và áp dụng RAG vào code
+* Code front end
 
 # Tên ai thì điền vào
 ## 01/04/2025
