@@ -1,7 +1,9 @@
 # WEB
 * Toàn bộ thông tin, quá trình lập trình, thiết kế, làm việc sẽ được lưu tại đây
+
+# Trương Minh Ngọc
 ## 16/03/2025
-### Đã làm được
+### Đã làm được 
 * Chỉnh sửa phần User Controller
 * Hoàn thiện thêm code của File service, với Permission, Role
 * Code các chức năng cho Permission, Role (thêm, xoá, xem toàn bộ)
@@ -27,7 +29,7 @@
 * Hoàn thiện login, logout trong tuần tới
 
 ## 30/03/2025
-### Đã làm được
+### Đã làm được 
 * Code xong phần ConFigure cho code
   * Điều chỉnh việc thêm tài khoản admin khi chưa có
   * Xử lý các request chưa được xác thực
@@ -35,7 +37,7 @@
 * Hoàn thiện phần controller, phần code đã ổn định với việc quản lý tài khoản
 
 ### Chưa làm được
-* Trong quá trình chạy lại để kiểm tra, lại phát sinh lỗi
+* Trong quá trình chạy lại để kiểm tra, lại phát sinh lỗi 
   * Mặc dù run được, nhưng các request đều bị lỗi Unauthorized!
 * Nguyên nhân vẫn đang tìm kiếm, nhưng đây có thể là lỗi về mặt phân quyền
 
@@ -44,18 +46,15 @@
 * Phát triển tiếp phần Front End
 * Tìm hiểu RAG
 
-## 06/04/2025
-### Đã làm được
-* Chỉnh sửa lỗi 1 số truy vấn như login, create account, get info, get account,...
-* Tạo thêm, cập nhập báo cáo ở file README.md
-* (1 thành viên khác) Code them phần review, infoBuy, OrderItem, ...
-
-### Chưa làm được
-* Sửa toàn bộ lỗi cho các truy vấn như update account, create role, ...
-* Chưa tìm hiểu được về thuật toán RAG
-* Báo cáo chậm thời gian (07/04/2025)
-
+## 12/4/2025
+### Đã làm được 
+* Code phân quyền cho các vai trò
+* Các vai trò user, staff, admin đều có quyền thực hiện 1 số chức năng chung, admin sẽ sở hữu nhiều quyền nhất, rồi tới staff, cuối cùng là user
+* Chạy thử đã ổn định các chức năng, API chính liên quan đến quản lý tài khoản, vai trò, quyền
+### Chưa làm được 
 ### Dự kiến tương lai
-* Khắc phục toàn bộ truy vấn
-* Cải thiện khả năng dùng github vs git
-* Tìm hiểu về RAG
+
+# Tên ai thì điền vào
+## 01/04/2025
+- Đã làm: Tạo Header và logic đổi Theme Light/Dark
+- Chưa làm: Tạo Category (danh mục sản phẩm) và Footer
