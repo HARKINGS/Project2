@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.harkins.startYourEngine.dto.request.RoleRequest;
 import com.harkins.startYourEngine.dto.response.RoleResponse;
-import com.harkins.startYourEngine.entity.Role;
 import com.harkins.startYourEngine.mapper.RoleMapper;
 import com.harkins.startYourEngine.repository.PermissionRepository;
 import com.harkins.startYourEngine.repository.RoleRepository;
@@ -27,13 +26,13 @@ public class RoleService {
     PermissionRepository permissionRepository;
 
     public RoleResponse createRole(RoleRequest roleRequest) {
-        Role role = roleMapper.toRole(roleRequest);
+        var role = roleMapper.toRole(roleRequest);
+
         var permissions = permissionRepository.findAllById(roleRequest.getPermissions());
-
         role.setPermissions(new HashSet<>(permissions));
-        roleRepository.save(role);
 
-        return roleMapper.toRoleResponse(roleRepository.save(role));
+        role = roleRepository.save(role);
+        return roleMapper.toRoleResponse(role);
     }
 
     public List<RoleResponse> getAllRoles() {
