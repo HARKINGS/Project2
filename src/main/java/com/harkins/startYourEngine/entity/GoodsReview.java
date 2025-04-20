@@ -4,6 +4,8 @@ import java.util.Date;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,26 +15,32 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-// @Entity
-public class Review {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+public class GoodsReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JsonBackReference("user-reviews")
+    User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goods_id", nullable = false)
-    private Goods good;
+    @JsonBackReference("goods-reviews")
+    Goods goods;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    String content;
 
     @Column(nullable = false)
-    private int rating;
+    int rating;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Date createdAt;
+    Date createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    Date updatedAt;
 }

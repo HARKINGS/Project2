@@ -50,9 +50,9 @@
 ### Đã làm được
 * Chỉnh sửa lỗi 1 số truy vấn như login, create account, get info, get account,...
 * Tạo thêm, cập nhập báo cáo ở file README.md
-* (1 thành viên khác) Code them phần review, infoBuy, OrderItem, ...
+* (1 thành viên khác) Code them phần goodsReview, infoBuy, OrderItem, ...
 
-## 12/4/2025
+## 12/04/2025
 ### Đã làm được 
 * Code phân quyền cho các vai trò
 * Các vai trò user, staff, admin đều có quyền thực hiện 1 số chức năng chung, admin sẽ sở hữu nhiều quyền nhất, rồi tới staff, cuối cùng là user
@@ -63,6 +63,18 @@
 ### Dự kiến tương lai
 * Tìm hiểu và áp dụng RAG vào code
 * Code front end
+
+## 20/04/2025
+### Đã làm được
+* Thực hiện up database lên cloud (= railway, tuy nhiên cloud của railway lại chỉ chấp nhận version java-17)
+* Hoan thiện, chỉnh sửa, đổi tên Review thành GoodsReview, cùng các class liên quan
+* Đã tìm hiểu về RAG, LLM (Language Model và Large Language Model), transformers 
+* Bắt đầu tiến hành làm báo cáo
+### Chưa làm được
+* Hoàn thiện báo cáo
+* Code xong RAG
+### Dự kiến
+* Tiếp tục code hoàn thiện Backend, code Frontend
 
 # Tên ai thì điền vào
 ## 01/04/2025

@@ -14,22 +14,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 public class Goods {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long goodsId;
+    Long goodsId;
 
-    private String goodsName;
-    private String goodsVersion;
-    private Long quantity;
-    private Double price;
-    private String goodsDescription;
-    private String goodsCategory;
-    private String goodsBrand;
-    private String goodsImageURL;
-    // private String goodsStatus;
-
-    //    @OneToMany(mappedBy = "goods", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    //    private List<Review> reviews;
+    String goodsName;
+    String goodsVersion;
+    Long quantity;
+    Double price;
+    String goodsDescription;
+    String goodsCategory;
+    String goodsBrand;
+    String goodsImageURL;
 }
