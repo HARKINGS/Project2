@@ -13,37 +13,36 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 public class InfoBuy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long infoBuyId;
+    Long infoBuyId;
 
     @OneToMany(mappedBy = "infoBuy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderItem> orderItems;
+    List<OrderItem> orderItems;
 
     @ManyToOne
     @JoinColumn(name = "voucherId")
-    private Voucher voucher;
+    Voucher voucher;
 
     @OneToOne
     @JoinColumn(name = "userId")
-    private User user;
+    User user;
 
     @OneToOne
     @JoinColumn(name = "addressId")
-    private Address address;
+    Address address;
 
-    private Double totalPrice;
-    private Double totalDiscount;
+    Double totalPrice;
+    Double totalDiscount;
 }

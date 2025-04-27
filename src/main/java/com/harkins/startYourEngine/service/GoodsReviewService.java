@@ -20,7 +20,9 @@ import com.harkins.startYourEngine.repository.GoodsRepository;
 import com.harkins.startYourEngine.repository.GoodsReviewRepository;
 import com.harkins.startYourEngine.repository.UserRepository;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
