@@ -29,8 +29,10 @@ public class VoucherService {
         return voucherMapper.toVoucherResponse(voucherRepository.save(voucher));
     }
 
-    public VoucherResponse getVoucher(Long identifiedVoucherId) {
-        Voucher voucher = voucherRepository.findByIdentifiedVoucherId(identifiedVoucherId);
+    public VoucherResponse getVoucher(String voucherId) {
+//        Voucher voucher = voucherRepository.findByIdentifiedVoucherId(identifiedVoucherId);
+        Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(() ->
+                new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         return voucherMapper.toVoucherResponse(voucher);
     }
 

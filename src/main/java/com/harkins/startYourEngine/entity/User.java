@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "web_user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,5 +27,10 @@ public class User {
     LocalDate dob;
 
     @ManyToMany
+//    @JoinTable(
+//        name = "user_roles", // Tên bảng trung gian
+//        joinColumns = @JoinColumn(name = "user_id"), // Khoá chính
+//        inverseJoinColumns = @JoinColumn(name = "name") // Khoá ngoaại
+//    )
     Set<Role> roles;
 }

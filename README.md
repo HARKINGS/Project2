@@ -91,7 +91,15 @@
 * Làm tiếp báo cáo
 * Hoàn thành chatbot
 
-# Tên ai thì điền vào
-## 01/04/2025
-- Đã làm: Tạo Header và logic đổi Theme Light/Dark
-- Chưa làm: Tạo Category (danh mục sản phẩm) và Footer
+## 04/05/2025
+### Đã làm được
+* Chuyển đổi cơ sở dữ liệu từ mysql sang postgresql
+* Hoàn thiện chức năng của Voucher
+* Tích hợp RAG vào phần mềm
+* Khởi tạo được giao diện đăng nhập
+### Chưa làm được
+* Code RAG chưa chạy được (Do lỗi về các bảng)
+* Chưa hoàn thiện được giao diện Front End
+### Dự tính tương lai
+* Sửa code RAG
+* Làm tiếp giao diện Front End

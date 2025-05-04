@@ -1,0 +1,15 @@
+services:
+  pgvector:
+    container_name: pgvector
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=webhitech
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=harkins
+    volumes:
+      - ./volume-data/postgres:/var/lib/postgresql/data
+volumes:
+  pgdata:
+  ollama_data:

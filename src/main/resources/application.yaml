@@ -4,20 +4,56 @@ server:
     context-path: /web
 
 spring:
+  application:
+    name: webHitech
   datasource:
-    url: jdbc:mysql://localhost:3306/webhitech
-    username: root
-    password:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
+    url: jdbc:postgresql://localhost:5432/webhitech
+    username: postgres
+    password: harkins
   jpa:
     hibernate:
       ddl-auto: update
-      show-sql: true
+    show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      init:
+        pull-model-strategy: when_missing
+        timeout: 5m
+      chat:
+        options:
+          model: mistral
+        model: llama3
+      embedding:
+        model: nomic-embed-text
+
+      vectorstore:
+        pgvector:
+          initialize-schema: true  # Đảm bảo schema được khởi tạo
+          database: webhitech
+          host: localhost
+          port: 5432
+          username: postgres
+          password: harkins
+          schema: public  # Chỉ định schema rõ ràng
+          table: ai_vector_store  # Đặt tên bảng cụ thể
+          embedding-dimension: 1536  # Kích thước của embedding vectors
+          create-table-if-not-exists: true  # Đảm bảo bảng được tạo nếu chưa tồn tại
+
+logging:
+  level:
+    org:
+      springframework:
+        ai:
+          vectorstore: DEBUG
+        jdbc:
+          core: DEBUG  # Bật log chi tiết cho JDBC để xem các câu SQL
+
 jwt:
   signerKey: "Ftbzo3IFNUZ/gqQhbF7/30/aoOASmg85tzSH/CCNA3XPyxbsi5RuywG/el7iIesc"
-  valid-duration: 3600 # Khoảng thời gian valid của 1 Token (s)
-  refreshable-duration: 14400 # Khoảng thời gian mà trong khoảng thời gian đó có thể refresh 1 Token (s)
+  valid-duration: 3600
+  refreshable-duration: 14400
