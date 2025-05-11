@@ -1,13 +1,11 @@
 package com.harkins.startYourEngine.dto.request;
 
-import java.time.LocalDate;
-
-import jakarta.validation.constraints.Size;
-
 import com.harkins.startYourEngine.validator.DobConstraint;
-
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -23,7 +21,6 @@ public class CreateUserRequest {
 
     String firstName;
     String lastName;
-
-    @DobConstraint(min = 18, message = "INVALID_DOB")
+    @DobConstraint(min = 16, message = "INVALID_DOB")
     LocalDate dob;
 }

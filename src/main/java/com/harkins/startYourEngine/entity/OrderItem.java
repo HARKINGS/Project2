@@ -1,7 +1,8 @@
 package com.harkins.startYourEngine.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.harkins.startYourEngine.enums.OrderStatus;
 import jakarta.persistence.*;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,16 +15,25 @@ import lombok.experimental.FieldDefaults;
 public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "infoBuyId")
-    InfoBuy infoBuy;
+    @JoinColumn(name = "orderId")
+    Order order;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    OrderStatus status = OrderStatus.PENDING;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goodsId")
     Goods goods;
 
     Integer quantity;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
 }

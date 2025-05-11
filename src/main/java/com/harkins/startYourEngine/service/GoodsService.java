@@ -1,23 +1,20 @@
 package com.harkins.startYourEngine.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import jakarta.persistence.EntityNotFoundException;
-
-import org.springframework.stereotype.Service;
-
 import com.harkins.startYourEngine.dto.request.CreateGoodsRequest;
 import com.harkins.startYourEngine.dto.request.UpdateGoodsRequest;
 import com.harkins.startYourEngine.dto.response.GoodsResponse;
 import com.harkins.startYourEngine.entity.Goods;
 import com.harkins.startYourEngine.mapper.GoodsMapper;
 import com.harkins.startYourEngine.repository.GoodsRepository;
-
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +32,7 @@ public class GoodsService {
         return goodsMapper.toGoodsResponse(goodsRepository.save(goods));
     }
 
-    public GoodsResponse getGoodsById(Long goodsId) {
+    public GoodsResponse getGoodsById(String goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() -> new RuntimeException("Goods not found!"));
         return goodsMapper.toGoodsResponse(goods);
     }
@@ -66,13 +63,13 @@ public class GoodsService {
                 .toList();
     }
 
-    public GoodsResponse updateGoods(Long goodsId, UpdateGoodsRequest request) {
+    public GoodsResponse updateGoods(String goodsId, UpdateGoodsRequest request) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() -> new RuntimeException("Goods not found!"));
         goodsMapper.updateGoods(goods, request);
         return goodsMapper.toGoodsResponse(goodsRepository.save(goods));
     }
 
-    public void deleteGoods(Long goodsId) {
+    public void deleteGoods(String goodsId) {
         goodsRepository.deleteById(goodsId);
     }
 }

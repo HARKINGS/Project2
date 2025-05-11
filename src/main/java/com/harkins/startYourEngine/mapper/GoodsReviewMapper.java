@@ -16,5 +16,6 @@ public interface GoodsReviewMapper {
     @Mapping(target = "userId", source = "user.userId")
     GoodsReviewResponse toReviewResponse(GoodsReview goodsReview);
 
-    void updateReviewResponse(@MappingTarget GoodsReview goodsReview, UpdateGoodsReviewRequest updateReviewRequest);
+    void updateReviewResponse(
+            @MappingTarget GoodsReview goodsReview, UpdateGoodsReviewRequest updateGoodsReviewRequest);
 }

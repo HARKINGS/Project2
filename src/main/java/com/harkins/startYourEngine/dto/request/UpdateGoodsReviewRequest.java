@@ -1,12 +1,11 @@
 package com.harkins.startYourEngine.dto.request;
 
-import java.util.Date;
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Date;
 
 @Data
 @Builder

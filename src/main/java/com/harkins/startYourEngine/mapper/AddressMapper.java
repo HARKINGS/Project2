@@ -1,12 +1,11 @@
 package com.harkins.startYourEngine.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
 import com.harkins.startYourEngine.dto.request.SaveAndUpdateAddressRequest;
 import com.harkins.startYourEngine.dto.response.AddressResponse;
 import com.harkins.startYourEngine.entity.Address;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface AddressMapper {

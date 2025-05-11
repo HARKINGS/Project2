@@ -22,7 +22,7 @@ import org.springframework.web.filter.CorsFilter;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private static final String[] PUBLIC_ENDPOINTS = {"/users", "/auth/**", "user/chat"};
+    private static final String[] PUBLIC_ENDPOINTS = {"/users", "/auth/**"};
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
@@ -36,6 +36,14 @@ public class SecurityConfig {
                 // hasAuthority("ROLE_ADMIN")
                 .anyRequest()
                 .authenticated());
+
+        //        Với kiểu config như này thì sẽ thoả mãn user chỉ cần vào web ko cần đăng nhập
+        //        http
+        //                .authorizeRequests()
+        //                .antMatchers("/admin/**").hasRole("ADMIN")
+        //                .antMatchers("/staff/**").hasRole("STAFF")
+        //                .antMatchers("/products/**", "/cart/**", "/checkout").permitAll()
+        //                .anyRequest().authenticated()
 
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(JwtConfigurer -> JwtConfigurer.decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))

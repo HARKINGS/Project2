@@ -1,7 +1,6 @@
 package com.harkins.startYourEngine.entity;
 
 import jakarta.persistence.*;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,8 +13,8 @@ import lombok.experimental.FieldDefaults;
 public class Address {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
 
     String street;
     String city;

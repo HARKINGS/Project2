@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateGoodsReviewRequest {
     @NotNull(message = "Goods ID is required")
-    Long goodsId;
+    String goodsId;
 
     @NotNull(message = "User ID is required")
     String userId;

@@ -1,23 +1,22 @@
 package com.harkins.startYourEngine.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
+@Entity
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity
 public class Goods {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long goodsId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String goodsId;
 
     String goodsName;
     String goodsVersion;
@@ -25,6 +24,13 @@ public class Goods {
     Double price;
     String goodsDescription;
     String goodsCategory;
-    String goodsBrand;
     String goodsImageURL;
+
+    @JsonManagedReference(value = "goods-orderItems")
+    @OneToMany(mappedBy = "goods", cascade = CascadeType.ALL)
+    List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "goods", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("goods-reviews")
+    List<GoodsReview> goodsReviews;
 }

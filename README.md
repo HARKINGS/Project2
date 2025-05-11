@@ -103,3 +103,14 @@
 ### Dự tính tương lai
 * Sửa code RAG
 * Làm tiếp giao diện Front End
+
+## 11/05/2025
+### Đã làm đươợc
+* Chỉnh sửa id của các entity
+### Chưa làm được
+* Lỗi khi thêm cac class thanh toan
+* RAG chưa chạy tốt
+* Tuan này em đang bị vướng BTL của nhiều mon, mong thầy thông cảm ạ
+### Dự kiến tương lai
+* Khắc phục lỗi
+* Xây dựng Front End

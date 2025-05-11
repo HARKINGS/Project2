@@ -1,13 +1,12 @@
 package com.harkins.startYourEngine.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
 import com.harkins.startYourEngine.dto.request.CreateUserRequest;
 import com.harkins.startYourEngine.dto.request.UpdateUserRequest;
 import com.harkins.startYourEngine.dto.response.UserResponse;
 import com.harkins.startYourEngine.entity.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {

@@ -1,31 +1,23 @@
 package com.harkins.startYourEngine.controller;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
+import com.harkins.startYourEngine.configuration.VnPayConfig;
+import com.harkins.startYourEngine.dto.request.PaymentRequest;
+import com.harkins.startYourEngine.dto.request.TransactionRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.harkins.startYourEngine.configuration.VnPayConfig;
-import com.harkins.startYourEngine.dto.request.PaymentRequest;
-import com.harkins.startYourEngine.dto.request.TransactionRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RestController
 @RequestMapping("/payment")
-public class PaymentController {
+public class VnPayController {
 
     @GetMapping("/create-payment")
     public ResponseEntity<?> createPayment() throws UnsupportedEncodingException {

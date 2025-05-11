@@ -1,14 +1,13 @@
 package com.harkins.startYourEngine.repository;
 
-import java.util.List;
-
+import com.harkins.startYourEngine.entity.Goods;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.harkins.startYourEngine.entity.Goods;
+import java.util.List;
 
 @Repository
-public interface GoodsRepository extends JpaRepository<Goods, Long> {
+public interface GoodsRepository extends JpaRepository<Goods, String> {
 
     boolean existsByGoodsName(String goodsName);
 

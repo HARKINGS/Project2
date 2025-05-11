@@ -1,11 +1,5 @@
 package com.harkins.startYourEngine.service;
 
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.harkins.startYourEngine.dto.request.CreateGoodsReviewRequest;
 import com.harkins.startYourEngine.dto.request.UpdateGoodsReviewRequest;
 import com.harkins.startYourEngine.dto.response.GoodsReviewResponse;
@@ -19,16 +13,20 @@ import com.harkins.startYourEngine.mapper.GoodsReviewMapper;
 import com.harkins.startYourEngine.repository.GoodsRepository;
 import com.harkins.startYourEngine.repository.GoodsReviewRepository;
 import com.harkins.startYourEngine.repository.UserRepository;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class GoodsReviewService {
 
     GoodsReviewRepository goodsReviewRepository;
@@ -38,7 +36,7 @@ public class GoodsReviewService {
     GoodsReviewMapper goodsReviewMapper;
 
     @Transactional
-    public GoodsReviewResponse createReview(Long goodsId, CreateGoodsReviewRequest request) {
+    public GoodsReviewResponse createReview(String goodsId, CreateGoodsReviewRequest request) {
         // Validate goods exists
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() -> {
             log.error("Goods not found with id: {}", goodsId);
@@ -74,7 +72,7 @@ public class GoodsReviewService {
         return goodsReviewMapper.toReviewResponse(savedGoodsReview);
     }
 
-    public GoodsReviewResponse getReviewById(Long reviewId) {
+    public GoodsReviewResponse getReviewById(String reviewId) {
         log.info("Getting review with id: {}", reviewId);
         GoodsReview goodsReview = goodsReviewRepository.findById(reviewId).orElseThrow(() -> {
             log.error("Review not found with id: {}", reviewId);
@@ -88,7 +86,7 @@ public class GoodsReviewService {
         return goodsReviews.stream().map(goodsReviewMapper::toReviewResponse).toList();
     }
 
-    public List<GoodsReviewResponse> getReviewByGoods(Long goodsId) {
+    public List<GoodsReviewResponse> getReviewByGoods(String goodsId) {
         if (!goodsRepository.existsById(goodsId)) {
             log.error("Goods not found with id: {}", goodsId);
             throw new AppException(ErrorCode.GOODS_NOT_FOUND);
@@ -102,7 +100,7 @@ public class GoodsReviewService {
     }
 
     @Transactional
-    public GoodsReviewResponse updateGoodsReview(Long reviewId, UpdateGoodsReviewRequest request) {
+    public GoodsReviewResponse updateGoodsReview(String reviewId, UpdateGoodsReviewRequest request) {
         // Tìm review theo ID
         GoodsReview existingGoodsReview = goodsReviewRepository
                 .findById(reviewId)
@@ -133,7 +131,7 @@ public class GoodsReviewService {
         return goodsReviewMapper.toReviewResponse(updatedGoodsReview);
     }
 
-    public void deleteGoodsReview(Long reviewId) {
+    public void deleteGoodsReview(String reviewId) {
         GoodsReview goodsReview = goodsReviewRepository
                 .findById(reviewId)
                 .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));

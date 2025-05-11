@@ -11,12 +11,21 @@ public class PgVectorStoreConfig {
 
     @Bean
     public PgVectorStore pgVectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel) {
-        // Tạo bảng vector nếu chưa tồn tại
+        // Tạo extension và bảng vector
         jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS vector");
+        jdbcTemplate.execute("""
+            CREATE TABLE IF NOT EXISTS document_vectors (
+                id VARCHAR PRIMARY KEY,
+                content TEXT,
+                metadata JSONB,
+                embedding VECTOR(768)  -- Số chiều phù hợp với nomic-embed-text
+            )
+            """);
 
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-                .vectorTableName("processed_pdf_files")  // Tên bảng lưu vector
-                .dimensions(1536)       // Dimension tùy thuộc vào embedding model
+                .vectorTableName("document_vectors")  // Tên bảng vector mới
+                .dimensions(768)      // Nomic-embed-text dùng 768 dimensions
+                .initializeSchema(true) // Kích hoạt tự động khởi tạo schema
                 .build();
     }
 }

@@ -1,14 +1,12 @@
 package com.harkins.startYourEngine.dto.request;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import jakarta.validation.constraints.Size;
-
 import com.harkins.startYourEngine.validator.DobConstraint;
-
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder

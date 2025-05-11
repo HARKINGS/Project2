@@ -1,12 +1,11 @@
 package com.harkins.startYourEngine.entity;
 
-import java.time.LocalDate;
-import java.util.Set;
-
 import jakarta.persistence.*;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -27,10 +26,5 @@ public class User {
     LocalDate dob;
 
     @ManyToMany
-//    @JoinTable(
-//        name = "user_roles", // Tên bảng trung gian
-//        joinColumns = @JoinColumn(name = "user_id"), // Khoá chính
-//        inverseJoinColumns = @JoinColumn(name = "name") // Khoá ngoaại
-//    )
     Set<Role> roles;
 }

@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GoodsResponse {
-    private Long goodsId;
+    String goodsId;
 
     String goodsName;
     String goodsVersion;
@@ -17,6 +17,5 @@ public class GoodsResponse {
     Double price;
     String goodsDescription;
     String goodsCategory;
-    String goodsBrand;
     String goodsImageURL;
 }

@@ -38,8 +38,6 @@ public class VoucherController {
     @DeleteMapping("{voucherId}")
     ApiResponse<String> deleteVoucher(@PathVariable("voucherId") String voucherId) {
         voucherService.deleteVoucher(voucherId);
-        return ApiResponse.<String>builder()
-                .result("Voucher deleted!")
-                .build();
+        return ApiResponse.<String>builder().result("Voucher deleted!").build();
     }
 }
