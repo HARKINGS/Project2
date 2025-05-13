@@ -12,6 +12,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -22,7 +24,7 @@ public class VoucherController {
     VoucherService voucherService;
 
     @PostMapping
-    ApiResponse<VoucherResponse> createVoucher(@Valid VoucherRequest request) {
+    ApiResponse<VoucherResponse> createVoucher(@Valid @RequestBody VoucherRequest request) {
         return ApiResponse.<VoucherResponse>builder()
                 .result(voucherService.createVoucher(request))
                 .build();
@@ -32,6 +34,13 @@ public class VoucherController {
     ApiResponse<VoucherResponse> getVoucher(@PathVariable("voucherId") String voucherId) {
         return ApiResponse.<VoucherResponse>builder()
                 .result(voucherService.getVoucher(voucherId))
+                .build();
+    }
+
+    @GetMapping
+    ApiResponse<List<VoucherResponse>> getVouchers() {
+        return ApiResponse.<List<VoucherResponse>>builder()
+                .result(voucherService.getVouchers())
                 .build();
     }
 

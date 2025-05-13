@@ -4,6 +4,8 @@ import com.harkins.startYourEngine.dto.request.CreateGoodsRequest;
 import com.harkins.startYourEngine.dto.request.UpdateGoodsRequest;
 import com.harkins.startYourEngine.dto.response.GoodsResponse;
 import com.harkins.startYourEngine.entity.Goods;
+import com.harkins.startYourEngine.exception.AppException;
+import com.harkins.startYourEngine.exception.ErrorCode;
 import com.harkins.startYourEngine.mapper.GoodsMapper;
 import com.harkins.startYourEngine.repository.GoodsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,7 +29,7 @@ public class GoodsService {
 
     public GoodsResponse createGoods(CreateGoodsRequest request) {
         if (goodsRepository.existsByGoodsName(request.getGoodsName()))
-            throw new RuntimeException("Goods already exists");
+            throw new AppException(ErrorCode.GOODS_EXISTED);
         Goods goods = goodsMapper.toGoods(request);
         return goodsMapper.toGoodsResponse(goodsRepository.save(goods));
     }

@@ -30,7 +30,8 @@ public class RoleService {
 //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('CREATE_ROLE')")
     public RoleResponse createRole(RoleRequest roleRequest) {
-        if (roleRepository.existsByName(roleRequest.getName())) throw new AppException(ErrorCode.ROLE_EXISTED);
+        if (roleRepository.existsByName(roleRequest.getName()))
+            throw new AppException(ErrorCode.ROLE_EXISTED);
 
         Role role = roleMapper.toRole(roleRequest);
         var permissions = permissionRepository.findAllById(roleRequest.getPermissions());

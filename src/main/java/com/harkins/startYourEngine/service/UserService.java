@@ -46,8 +46,6 @@ public class UserService {
 
         HashSet<Role> roles = new HashSet<>();
 
-        System.out.println(roleType);
-
         if(Objects.equals(roleType, "STAFF")) roleRepository.findById(PredefinedRole.STAFF).ifPresent(roles::add);
         else roleRepository.findById(PredefinedRole.USER).ifPresent(roles::add);
 

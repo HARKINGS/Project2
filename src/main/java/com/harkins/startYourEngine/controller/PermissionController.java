@@ -4,6 +4,7 @@ import com.harkins.startYourEngine.dto.request.PermissionRequest;
 import com.harkins.startYourEngine.dto.response.ApiResponse;
 import com.harkins.startYourEngine.dto.response.PermissionResponse;
 import com.harkins.startYourEngine.service.PermissionService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class PermissionController {
     PermissionService permissionService;
 
     @PostMapping
-    ApiResponse<PermissionResponse> createPermission(@RequestBody PermissionRequest request) {
+    ApiResponse<PermissionResponse> createPermission(@Valid @RequestBody PermissionRequest request) {
         return ApiResponse.<PermissionResponse>builder()
                 .result(permissionService.createPermission(request))
                 .build();

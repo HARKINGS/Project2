@@ -26,10 +26,10 @@ public class PermissionService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse createPermission(PermissionRequest request) {
-        if (permissionRepository.existsByName(request.getName())) throw new AppException(ErrorCode.PERMISSION_EXISTED);
+        if (permissionRepository.existsByName(request.getName()))
+            throw new AppException(ErrorCode.PERMISSION_EXISTED);
         Permission permission = permissionMapper.toPermission(request);
-        permissionRepository.save(permission);
-        return permissionMapper.toPermissionResponse(permission);
+        return permissionMapper.toPermissionResponse(permissionRepository.save(permission));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

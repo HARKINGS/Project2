@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -24,10 +26,13 @@ public class VoucherService {
 
     @PreAuthorize("hasAuthority('CREATE_VOUCHER')")
     public VoucherResponse createVoucher(VoucherRequest request) {
+        System.out.println(request.getVoucherName());
+
         if (voucherRepository.existsByIdentifiedVoucherId(request.getIdentifiedVoucherId()))
             throw new AppException(ErrorCode.VOUCHER_EXISTED);
 
         Voucher voucher = voucherMapper.toVoucher(request);
+        System.out.println(voucher.getVoucherName());
         return voucherMapper.toVoucherResponse(voucherRepository.save(voucher));
     }
 
@@ -37,6 +42,10 @@ public class VoucherService {
         Voucher voucher =
                 voucherRepository.findById(voucherId).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         return voucherMapper.toVoucherResponse(voucher);
+    }
+
+    public List<VoucherResponse> getVouchers() {
+        return voucherRepository.findAll().stream().map(voucherMapper::toVoucherResponse).toList();
     }
 
     @PreAuthorize("hasAuthority('DELETE_VOUCHER')")

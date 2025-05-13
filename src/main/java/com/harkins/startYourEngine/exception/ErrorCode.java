@@ -24,10 +24,11 @@ public enum ErrorCode {
     PERMISSION_EXISTED(1011, "Permission already exists", HttpStatus.BAD_REQUEST),
     INVALID_DOB(1012, "Your age must be at least {min}!", HttpStatus.BAD_REQUEST),
     GOODS_NOT_FOUND(1010, "Goods not found!", HttpStatus.NOT_FOUND),
-    REVIEW_NOT_FOUND(1011, "Review not found!", HttpStatus.NOT_FOUND),
-    REVIEW_ALREADY_EXISTS(1012, "Review already exists!", HttpStatus.BAD_REQUEST),
-    VOUCHER_EXISTED(1013, "Voucher already exists!", HttpStatus.BAD_REQUEST),
-    VOUCHER_NOT_FOUND(1014, "Voucher not found!", HttpStatus.NOT_FOUND),
+    GOODS_EXISTED(1011, "Goods already exists", HttpStatus.BAD_REQUEST),
+    REVIEW_NOT_FOUND(1012, "Review not found!", HttpStatus.NOT_FOUND),
+    REVIEW_ALREADY_EXISTS(1013, "Review already exists!", HttpStatus.BAD_REQUEST),
+    VOUCHER_EXISTED(1014, "Voucher already exists!", HttpStatus.BAD_REQUEST),
+    VOUCHER_NOT_FOUND(1015, "Voucher not found!", HttpStatus.NOT_FOUND),
     ;
 
     int code;
