@@ -3,17 +3,24 @@ package com.harkins.startYourEngine.service;
 import com.harkins.startYourEngine.dto.request.CreateOrderItemRequest;
 import com.harkins.startYourEngine.dto.request.CreateOrderRequest;
 import com.harkins.startYourEngine.dto.response.OrderResponse;
-import com.harkins.startYourEngine.dto.response.UserResponse;
-import com.harkins.startYourEngine.entity.*;
+import com.harkins.startYourEngine.entity.Goods;
+import com.harkins.startYourEngine.entity.Order;
+import com.harkins.startYourEngine.entity.OrderItem;
+import com.harkins.startYourEngine.entity.Voucher;
+import com.harkins.startYourEngine.enums.OrderItemStatus;
 import com.harkins.startYourEngine.enums.OrderStatus;
 import com.harkins.startYourEngine.enums.PaymentStatus;
 import com.harkins.startYourEngine.mapper.OrderMapper;
-import com.harkins.startYourEngine.repository.*;
+import com.harkins.startYourEngine.repository.GoodsRepository;
+import com.harkins.startYourEngine.repository.OrderItemRepository;
+import com.harkins.startYourEngine.repository.OrderRepository;
+import com.harkins.startYourEngine.repository.VoucherRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,27 +37,12 @@ public class OrderService {
     OrderRepository orderRepo;
     OrderItemRepository orderItemRepo;
     GoodsRepository goodsRepo;
-    UserService userService;
     OrderMapper orderMapper;
-    AddressRepository addressRepo;
     VoucherRepository voucherRepo;
-    UserRepository userRepository;
 
+    @PreAuthorize("hasAuthority('PLACE_ORDER')")
     @Transactional(rollbackFor = Exception.class)
     public OrderResponse placeOrder(CreateOrderRequest request) throws NotFoundException {
-        // Lấy user đang đăng nhập (DTO)
-        UserResponse userResponse = userService.getMyInfo();
-        // Lấy entity User từ userId
-        User user = userRepository
-                .findById(userResponse.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userResponse.getUserId()));
-
-        // Lấy địa chỉ giao hàng (nếu có)
-        Address address = null;
-        if (request.getAddressId() != null) {
-            address = addressRepo.findById(request.getAddressId()).orElseThrow(() -> new NotFoundException());
-        }
-
         // Lấy voucher (nếu có)
         Voucher voucher = null;
         if (request.getVoucherId() != null) {
@@ -59,14 +51,10 @@ public class OrderService {
 
         // Tạo đơn hàng mới
         Order order = new Order();
-        order.setUser(user);
-        order.setAddress(address);
+        order.setShippingAddress(request.getShippingAddress());
         order.setVoucher(voucher);
         order.setTotalPrice(request.getTotalPrice());
         order.setTotalDiscount(request.getTotalDiscount());
-        order.setPaymentMethod(request.getPaymentMethod());
-
-        // Đảm bảo có status cho Order
         if ("ZALOPAY".equalsIgnoreCase(request.getPaymentMethod())
                 || "VNPAY".equalsIgnoreCase(request.getPaymentMethod())) {
             order.setStatus(OrderStatus.PROCESSING);
@@ -86,9 +74,8 @@ public class OrderService {
             OrderItem item = new OrderItem();
             item.setGoods(goods);
             item.setQuantity(itemReq.getQuantity());
-            item.setUser(user);
             item.setOrder(order);
-            item.setStatus(order.getStatus()); // Lấy status từ Order
+            item.setStatus(OrderItemStatus.PENDING);
 
             orderItems.add(item);
         }
@@ -102,6 +89,7 @@ public class OrderService {
         return orderMapper.toOrderResponse(savedOrder);
     }
 
+    @PreAuthorize("hasAuthority('UPDATE_ORDERITEM')")
     public OrderResponse updateOrderItemStatus(String orderItemId, String status) {
         // Vì OrderItem không có trường status, chúng ta sẽ cập nhật trạng thái của đơn hàng chứa item này
         OrderItem orderItem = orderItemRepo.findById(orderItemId).orElseThrow(() -> new RuntimeException());
@@ -119,6 +107,7 @@ public class OrderService {
         }
     }
 
+    @PreAuthorize("hasAuthority('GET_ORDER_BY_ID')")
     public OrderResponse getOrderById(String orderId) throws NotFoundException {
         log.info("Getting order by ID: {}", orderId);
 
@@ -130,12 +119,14 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    public List<OrderResponse> getCurrentUserOrders() {
-        UserResponse user = userService.getMyInfo();
-        List<Order> orders = orderRepo.findByUser_UserId(user.getUserId());
-        return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
-    }
+    // @PreAuthorize("hasAuthority('GET_CURRENT_USERORDERS')")
+    // public List<OrderResponse> getCurrentUserOrders() {
+    //     UserResponse user = userService.getMyInfo();
+    //     List<Order> orders = orderRepo.findByUser_UserId(user.getUserId());
+    //     return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
+    // }
 
+    @PreAuthorize("hasAuthority('UPDATE_ORDER_STATUS')")
     @Transactional
     public OrderResponse updateOrderStatus(String orderId, String status) throws NotFoundException {
         Order order = orderRepo.findById(orderId).orElseThrow(() -> new NotFoundException());
@@ -150,6 +141,7 @@ public class OrderService {
         }
     }
 
+    @PreAuthorize("hasAuthority('UPDATE_PAYMENT_STATUS')")
     @Transactional
     public OrderResponse updatePaymentStatus(String orderId, String status) throws Exception {
         try {
@@ -190,11 +182,13 @@ public class OrderService {
         }
     }
 
+    @PreAuthorize("hasAuthority('GET_ALL_ORDERS')")
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepo.findAll();
         return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasAuthority('GET_ORDERS_BY_STATUS')")
     public List<OrderResponse> getOrdersByStatus(String status) {
         try {
             log.info("Finding orders with status: {}", status);
@@ -211,13 +205,14 @@ public class OrderService {
         }
     }
 
-    public List<OrderResponse> getOrdersByUserId(String userId) {
-        List<Order> orders = orderRepo.findByUser_UserId(userId);
-        return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
-    }
+     @PreAuthorize("hasAuthority('GET_ORDERS_BY_USERID')")
+     public List<OrderResponse> getOrdersByUserId(String userId) {
+         List<Order> orders = orderRepo.findByUser_UserId(userId);
+         return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
+     }
 
-    public List<OrderResponse> deleteOrder(String orderId) {
+    @PreAuthorize("hasAuthority('DELETE_ORDER')")
+    public void deleteOrder(String orderId) {
         orderRepo.deleteById(orderId);
-        return getCurrentUserOrders();
     }
 }

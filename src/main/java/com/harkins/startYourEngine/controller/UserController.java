@@ -25,8 +25,8 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/{roleType}")
-    ApiResponse<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request,
-                                         @PathVariable("roleType") String roleType) {
+    ApiResponse<UserResponse> createUser(
+            @Valid @RequestBody CreateUserRequest request, @PathVariable("roleType") String roleType) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request, roleType))
                 .build();
@@ -54,7 +54,8 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUser(@PathVariable("userId") String userId, @Valid @RequestBody UpdateUserRequest request) {
+    ApiResponse<UserResponse> updateUser(
+            @PathVariable("userId") String userId, @Valid @RequestBody UpdateUserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateUser(userId, request))
                 .build();

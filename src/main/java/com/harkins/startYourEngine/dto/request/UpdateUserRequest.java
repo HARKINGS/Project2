@@ -1,6 +1,7 @@
 package com.harkins.startYourEngine.dto.request;
 
 import com.harkins.startYourEngine.validator.DobConstraint;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +18,10 @@ public class UpdateUserRequest {
     @Size(min = 6, message = "INVALID_PASSWORD")
     String password;
 
+    @NotBlank(message = "NOT_EMPTY")
     String firstName;
+
+    @NotBlank(message = "NOT_EMPTY")
     String lastName;
 
     @DobConstraint(min = 18, message = "INVALID_DOB")

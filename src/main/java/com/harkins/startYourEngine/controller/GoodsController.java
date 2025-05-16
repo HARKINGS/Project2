@@ -1,9 +1,7 @@
 package com.harkins.startYourEngine.controller;
 
 import com.harkins.startYourEngine.dto.request.CreateGoodsRequest;
-import com.harkins.startYourEngine.dto.request.CreateGoodsReviewRequest;
 import com.harkins.startYourEngine.dto.request.UpdateGoodsRequest;
-import com.harkins.startYourEngine.dto.request.UpdateGoodsReviewRequest;
 import com.harkins.startYourEngine.dto.response.ApiResponse;
 import com.harkins.startYourEngine.dto.response.GoodsDetailsResponse;
 import com.harkins.startYourEngine.dto.response.GoodsResponse;
@@ -34,7 +32,7 @@ public class GoodsController {
     GoodsReviewService goodsReviewService;
 
     @GetMapping("/details/{goodsId}")
-    public ResponseEntity<?> getGoodsWithReviews(@PathVariable String goodsId) {
+    public ResponseEntity<?> getGoodsWithReviews(@PathVariable("goodsId") String goodsId) {
         try {
             // Lấy thông tin sản phẩm
             GoodsResponse goods = goodsService.getGoodsById(goodsId);
@@ -88,9 +86,9 @@ public class GoodsController {
                 .build();
     }
 
-    @PutMapping("/update")
+    @PutMapping("/{goodId}")
     ApiResponse<GoodsResponse> updateGoods(
-            @RequestParam("goodsId") String goodsId, @Valid @RequestBody UpdateGoodsRequest request) {
+            @PathVariable("goodsId") String goodsId, @Valid @RequestBody UpdateGoodsRequest request) {
         return ApiResponse.<GoodsResponse>builder()
                 .result(goodsService.updateGoods(goodsId, request))
                 .build();
@@ -106,30 +104,6 @@ public class GoodsController {
     public ApiResponse<List<GoodsReviewResponse>> getGoodsReviews(@PathVariable("goodsId") String goodsId) {
         return ApiResponse.<List<GoodsReviewResponse>>builder()
                 .result(goodsReviewService.getReviewByGoods(goodsId))
-                .build();
-    }
-
-    @PostMapping("/{goodsId}/reviews")
-    public ApiResponse<GoodsReviewResponse> createReview(
-            @PathVariable("goodsId") String goodsId, @Valid @RequestBody CreateGoodsReviewRequest request) {
-        return ApiResponse.<GoodsReviewResponse>builder()
-                .result(goodsReviewService.createReview(goodsId, request))
-                .build();
-    }
-
-    @PutMapping("/reviews/{reviewId}")
-    public ApiResponse<GoodsReviewResponse> updateReview(
-            @PathVariable("reviewId") String reviewId, @Valid @RequestBody UpdateGoodsReviewRequest request) {
-        return ApiResponse.<GoodsReviewResponse>builder()
-                .result(goodsReviewService.updateGoodsReview(reviewId, request))
-                .build();
-    }
-
-    @DeleteMapping("/reviews/{reviewId}")
-    public ApiResponse<String> deleteReview(@PathVariable("reviewId") String reviewId) {
-        goodsReviewService.deleteGoodsReview(reviewId);
-        return ApiResponse.<String>builder()
-                .result("Review deleted successfully")
                 .build();
     }
 }

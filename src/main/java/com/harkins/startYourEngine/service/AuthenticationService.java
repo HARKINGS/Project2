@@ -56,6 +56,7 @@ public class AuthenticationService {
     protected long REFRESHABLE_DURATION;
 
     // Kiểm tra token đưa vào có hợp lệ không
+    //    @PreAuthorize("hasAuthority('CHECK_TOKEN')")
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
         boolean isValid = true;
@@ -72,6 +73,7 @@ public class AuthenticationService {
     }
 
     // Đưa ra token khi đăng nhập thành công
+    //    @PreAuthorize("hasAuthority('LOGIN')")
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         User user = userRepository
                 .findByUsername(request.getUsername())
@@ -90,6 +92,7 @@ public class AuthenticationService {
     }
 
     // Đưa ra token khi đăng xuất thành công
+    //    @PreAuthorize("hasAuthority('LOGOUT')")
     public void logout(LogoutRequest request) throws JOSEException, ParseException {
         try {
             var signToken = verifyToken(request.getToken(), true);
@@ -155,6 +158,7 @@ public class AuthenticationService {
     // Refresh token
     // Khi token hết hạn, ta có thể tạo một token mới bằng cách sử dụng token cũ
     // Token mới sẽ có thời gian hết hạn mới, thông tin người dùng không thay đổi
+    //    @PreAuthorize("hasAuthority('REFRESH_TOKEN')")
     public AuthenticationResponse refreshToken(RefreshRequest request) throws JOSEException, ParseException {
         // Kiểm tra hiệu lực Token
         SignedJWT signToken = verifyToken(request.getToken(), true);

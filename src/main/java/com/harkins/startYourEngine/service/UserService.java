@@ -35,19 +35,20 @@ public class UserService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('CREATE_USER')")
     public UserResponse createUser(CreateUserRequest request, String roleType) {
-        if (userRepository.existsByUsername(request.getUsername()))
-            throw new AppException(ErrorCode.USER_EXISTED);
+        if (userRepository.existsByUsername(request.getUsername())) throw new AppException(ErrorCode.USER_EXISTED);
 
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         HashSet<Role> roles = new HashSet<>();
 
-        if(Objects.equals(roleType, "STAFF")) roleRepository.findById(PredefinedRole.STAFF).ifPresent(roles::add);
-        else roleRepository.findById(PredefinedRole.USER).ifPresent(roles::add);
+        if (Objects.equals(roleType, "STAFF"))
+            roleRepository.findById(PredefinedRole.STAFF).ifPresent(roles::add);
+        else if (Objects.equals(roleType, "USER"))
+            roleRepository.findById(PredefinedRole.USER).ifPresent(roles::add);
+        else throw new AppException(ErrorCode.WRONG_ROLE);
 
         user.setRoles(roles);
 
@@ -64,9 +65,8 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-//    Có quyền thay đổi và còn phải tên tài khoản trùng với tài khoản đăng nhập
-    @PreAuthorize("hasAuthority('UPDATE_USER')")
-    @PostAuthorize("returnObject.username == authentication.name")
+    //    Có quyền thay đổi và còn phải tên tài khoản trùng với tài khoản đăng nhập
+    @PreAuthorize("hasRole('ADMIN') or returnObject.username == authentication.name")
     public UserResponse updateUser(String userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -79,20 +79,17 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('DELETE_USER')")
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('GET_ALL_USERS')")
     public List<UserResponse> getUsers() {
         log.info("In method get Users");
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('GET_USER')")
     public UserResponse getUser(String id) {
         log.info("In method get user by Id");

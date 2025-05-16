@@ -1,7 +1,7 @@
 package com.harkins.startYourEngine.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.harkins.startYourEngine.enums.OrderStatus;
+import com.harkins.startYourEngine.enums.OrderItemStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +24,7 @@ public class OrderItem {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    OrderStatus status = OrderStatus.PENDING;
+    OrderItemStatus status = OrderItemStatus.PENDING;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goodsId")

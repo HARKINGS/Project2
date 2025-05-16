@@ -10,11 +10,18 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateGoodsRequest {
     String goodsName;
+
     String goodsVersion;
+
     Long quantity;
-    Double price;
+
+    Long price;
+
     String goodsDescription;
+
     String goodsCategory;
+
     String goodsBrand;
+
     String goodsImageURL;
 }

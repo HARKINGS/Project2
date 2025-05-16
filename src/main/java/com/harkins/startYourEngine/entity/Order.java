@@ -32,9 +32,7 @@ public class Order {
     @JoinColumn(name = "userId")
     User user;
 
-    @OneToOne
-    @JoinColumn(name = "addressId")
-    Address address;
+    String shippingAddress;
 
     @Enumerated(EnumType.STRING)
     OrderStatus status = OrderStatus.PENDING;

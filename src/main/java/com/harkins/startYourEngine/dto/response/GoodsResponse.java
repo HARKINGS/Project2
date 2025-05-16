@@ -10,11 +10,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GoodsResponse {
     String goodsId;
-
     String goodsName;
     String goodsVersion;
     Long quantity;
-    Double price;
+    Long price;
     String goodsDescription;
     String goodsCategory;
     String goodsImageURL;

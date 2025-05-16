@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +27,10 @@ public class VoucherService {
 
     @PreAuthorize("hasAuthority('CREATE_VOUCHER')")
     public VoucherResponse createVoucher(VoucherRequest request) {
-        System.out.println(request.getVoucherName());
-
         if (voucherRepository.existsByIdentifiedVoucherId(request.getIdentifiedVoucherId()))
             throw new AppException(ErrorCode.VOUCHER_EXISTED);
 
         Voucher voucher = voucherMapper.toVoucher(request);
-        System.out.println(voucher.getVoucherName());
         return voucherMapper.toVoucherResponse(voucherRepository.save(voucher));
     }
 
@@ -44,8 +42,13 @@ public class VoucherService {
         return voucherMapper.toVoucherResponse(voucher);
     }
 
-    public List<VoucherResponse> getVouchers() {
-        return voucherRepository.findAll().stream().map(voucherMapper::toVoucherResponse).toList();
+    @PreAuthorize("hasAuthority('GET_ALL_VOUCHERS')")
+    public List<VoucherResponse> getAllVouchers() {
+        return voucherRepository
+                .findAll()
+                .stream()
+                .map(voucherMapper::toVoucherResponse)
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAuthority('DELETE_VOUCHER')")

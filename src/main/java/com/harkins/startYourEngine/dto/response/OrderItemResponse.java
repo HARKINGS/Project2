@@ -1,21 +1,18 @@
 package com.harkins.startYourEngine.dto.response;
 
 import com.harkins.startYourEngine.enums.OrderStatus;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItemResponse {
-    String id;
-    Long orderId;
-    OrderStatus status;
-    Long goodsId;
-    String goodsName;
-    Integer quantity;
-    Long userId;
-    String username;
+    private String id;
+    private String orderId;
+    private OrderStatus status;
+    private String goodsId;
+    private String goodsName;
+    private Integer quantity;
+    private String userId;
+    private String username;
 }

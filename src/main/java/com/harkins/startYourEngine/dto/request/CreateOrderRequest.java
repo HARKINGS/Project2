@@ -1,9 +1,8 @@
 package com.harkins.startYourEngine.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
@@ -11,11 +10,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateOrderRequest {
-    private List<CreateOrderItemRequest> orderItems;
-    private String addressId;
-    private String voucherId;
-    private String paymentMethod;
-    private Double totalPrice;
-    private Double totalDiscount;
+    @NotBlank(message = "NOT_EMPTY")
+    List<CreateOrderItemRequest> orderItems;
+
+    @NotBlank(message = "NOT_EMPTY")
+    String shippingAddress;
+
+    String voucherId;
+
+    @NotBlank(message = "NOT_EMPTY")
+    String paymentMethod;
+
+    @NotBlank(message = "NOT_EMPTY")
+    Double totalPrice;
+
+    @NotBlank(message = "NOT_EMPTY")
+    Double totalDiscount;
 }
