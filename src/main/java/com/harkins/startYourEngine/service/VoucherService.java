@@ -44,9 +44,7 @@ public class VoucherService {
 
     @PreAuthorize("hasAuthority('GET_ALL_VOUCHERS')")
     public List<VoucherResponse> getAllVouchers() {
-        return voucherRepository
-                .findAll()
-                .stream()
+        return voucherRepository.findAll().stream()
                 .map(voucherMapper::toVoucherResponse)
                 .collect(Collectors.toList());
     }

@@ -50,12 +50,6 @@ public class ApplicationInitConfig {
     }
 
     private void initPermission() {
-        //        AddressService
-        //        addPermission("SAVE_ADDRESS", "Save and Update Address");
-
-        //        AuthenticationService
-        //        addPermission("LOGIN", "Login account");
-        //        addPermission("LOOUT", "Loout account");
         addPermission("CHECK_TOKEN", "Check token Valid");
         addPermission("REFRESH_TOKEN", "Refresh token Valid");
 
@@ -69,7 +63,12 @@ public class ApplicationInitConfig {
 
         //        GoodsService
         addPermission("CREATE_GOODS", "Create a goods");
+        addPermission("GET_GOODS_BY_RATING", "Lọc hàng hóa theo đánh giá");
+        addPermission("GET_GOODS_SORTED", "Sắp xếp hàng hóa theo tên");
         addPermission("GET_ALL_GOODS", "Get info of all goods");
+        addPermission("GET_GOODS_BY_PRICE", "Get GoodsList by Price");
+        addPermission("GET_GOODS_BY_PRICE_RANGE", "Get GoodsList By Price Range");
+        addPermission("GET_GOODS_BY_BRANCH", "Get GoodsList By Brand Name");
         addPermission("UPDATE_GOODS", "Update goods information");
         addPermission("DELETE_GOODS", "Delete a goods");
         addPermission("GET_GOODS_BY_ID", "Get info of a goods by goodsid");
@@ -134,14 +133,16 @@ public class ApplicationInitConfig {
                         "GET_GOODS_BY_ID",
                         "GET_GOODS_BY_NAME",
                         "GET_GOODS_BY_CATEGORY",
-
+                        "GET_GOODS_BY_BRANCH",
+                        "GET_GOODS_BY_PRICE_RANGE",
+                        "GET_GOODS_BY_PRICE",
+                        "GET_GOODS_BY_RATING",
+                        "GET_GOODS_SORTED",
                         "GET_VOUCHER",
                         "GET_ALL_VOUCHERS",
-
                         "CREATE_REVIEWS",
                         "GET_ALL_REVIEWS",
                         "GET_REVIEWS_BY_ID",
-
                         "PLACE_ORDER",
                         "DELETE_ORDER",
                         "UPDATE_ORDERITEM",
@@ -152,7 +153,6 @@ public class ApplicationInitConfig {
                         "GET_ALL_ORDERS",
                         "GET_ORDERS_BY_STATUS",
                         "GET_ORDERS_BY_USERID",
-
                         "GET_ORDER_STATUS",
                         "CREATE_ORDER",
                         "UPDATE_ORDER_TRANSACTIONID");
@@ -160,25 +160,26 @@ public class ApplicationInitConfig {
                 Set<String> staffPermissions = Set.of(
                         "CHECK_TOKEN",
                         "REFRESH_TOKEN",
-
                         "CREATE_GOODS",
                         "GET_ALL_GOODS",
                         "GET_GOODS_BY_ID",
                         "GET_GOODS_BY_NAME",
                         "GET_GOODS_BY_CATEGORY",
                         "GET_REVIEWS_BY_GOODS",
-
+                        "GET_GOODS_BY_BRANCH",
+                        "GET_GOODS_BY_PRICE_RANGE",
+                        "GET_GOODS_BY_PRICE",
+                        "GET_GOODS_BY_RATING",
+                        "GET_GOODS_SORTED",
                         "CREATE_VOUCHER",
                         "DELETE_VOUCHER",
                         "GET_VOUCHER",
                         "GET_ALL_VOUCHERS",
-
                         "CREATE_REVIEWS",
                         "GET_REVIEWS_BY_ID",
                         "GET_ALL_REVIEWS",
                         "UPDATE_REVIEWS",
                         "DELETE_REVIEWS",
-
                         "PLACE_ORDER",
                         "DELETE_ORDER",
                         "UPDATE_ORDERITEM",
@@ -189,7 +190,6 @@ public class ApplicationInitConfig {
                         "GET_ALL_ORDERS",
                         "GET_ORDERS_BY_STATUS",
                         "GET_ORDERS_BY_USERID",
-
                         "GET_ORDER_STATUS",
                         "CREATE_ORDER",
                         "UPDATE_ORDER_TRANSACTIONID");

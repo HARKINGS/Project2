@@ -1,6 +1,8 @@
 package com.harkins.startYourEngine.dto.request;
 
+import com.harkins.startYourEngine.enums.PaymentMethod;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,20 +14,21 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateOrderRequest {
-    @NotBlank(message = "NOT_EMPTY")
+    @NotNull(message = "NOT_EMPTY")
     List<CreateOrderItemRequest> orderItems;
 
     @NotBlank(message = "NOT_EMPTY")
     String shippingAddress;
 
+    @NotBlank(message = "NOT_EMPTY")
     String voucherId;
 
-    @NotBlank(message = "NOT_EMPTY")
-    String paymentMethod;
+    @NotNull(message = "NOT_EMPTY")
+    PaymentMethod paymentMethod;
 
-    @NotBlank(message = "NOT_EMPTY")
-    Double totalPrice;
+    @NotNull(message = "NOT_EMPTY")
+    Long totalPrice;
 
-    @NotBlank(message = "NOT_EMPTY")
-    Double totalDiscount;
+    @NonNull
+    Long totalDiscount;
 }

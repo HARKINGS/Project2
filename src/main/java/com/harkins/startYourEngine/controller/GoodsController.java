@@ -65,7 +65,7 @@ public class GoodsController {
                 .build();
     }
 
-    @GetMapping("/{goodsId}")
+    @GetMapping("/by-id/{goodsId}")
     ApiResponse<GoodsResponse> getGoodsById(@PathVariable("goodsId") String goodsId) {
         return ApiResponse.<GoodsResponse>builder()
                 .result(goodsService.getGoodsById(goodsId))
@@ -86,9 +86,52 @@ public class GoodsController {
                 .build();
     }
 
-    @PutMapping("/{goodId}")
-    ApiResponse<GoodsResponse> updateGoods(
-            @PathVariable("goodsId") String goodsId, @Valid @RequestBody UpdateGoodsRequest request) {
+    @GetMapping("/by-brand/{goodsBrand}")
+    ApiResponse<List<GoodsResponse>> getGoodsByBrand(@PathVariable("goodsBrand") String goodsBrand) {
+        return ApiResponse.<List<GoodsResponse>>builder()
+                .result(goodsService.getGoodsByBrand(goodsBrand))
+                .build();
+    }
+
+    @GetMapping("/by-price/{goodsPrice}")
+    ApiResponse<List<GoodsResponse>> getGoodsByPrice(@PathVariable("goodsPrice") Long price) {
+        return ApiResponse.<List<GoodsResponse>>builder()
+                .result(goodsService.getGoodsByPrice(price))
+                .build();
+    }
+
+    @GetMapping("/{minPrice}_{maxPrice}")
+    ApiResponse<List<GoodsResponse>> getGoodsByPrice(@PathVariable("minPrice") Long minPrice,
+                                                     @PathVariable("maxPrice") Long maxPrice) {
+        return ApiResponse.<List<GoodsResponse>>builder()
+                .result(goodsService.getGoodsByPriceRange(minPrice, maxPrice))
+                .build();
+    }
+
+    @GetMapping("/by-rating")
+    public ApiResponse<List<GoodsResponse>> getGoodsByRating(@RequestParam("min") int minRating) {
+        return ApiResponse.<List<GoodsResponse>>builder()
+                .result(goodsService.getGoodsByMinRating(minRating))
+                .build();
+    }
+
+    @GetMapping("/sort-name-asc")
+    public ApiResponse<List<GoodsResponse>> sortByNameAsc() {
+        return ApiResponse.<List<GoodsResponse>>builder()
+                .result(goodsService.getGoodsSortedByNameAsc())
+                .build();
+    }
+
+    @GetMapping("/sort-name-desc")
+    public ApiResponse<List<GoodsResponse>> sortByNameDesc() {
+        return ApiResponse.<List<GoodsResponse>>builder()
+                .result(goodsService.getGoodsSortedByNameDesc())
+                .build();
+    }
+
+    @PutMapping("/{goodsId}")
+    ApiResponse<GoodsResponse> updateGoods(@PathVariable("goodsId") String goodsId,
+                                           @Valid @RequestBody UpdateGoodsRequest request) {
         return ApiResponse.<GoodsResponse>builder()
                 .result(goodsService.updateGoods(goodsId, request))
                 .build();

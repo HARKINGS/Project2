@@ -13,7 +13,6 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "account")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

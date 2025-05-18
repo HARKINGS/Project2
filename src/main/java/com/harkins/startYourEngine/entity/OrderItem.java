@@ -1,6 +1,5 @@
 package com.harkins.startYourEngine.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.harkins.startYourEngine.enums.OrderItemStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,9 +30,4 @@ public class OrderItem {
     Goods goods;
 
     Integer quantity;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User user;
 }

@@ -19,6 +19,50 @@
         "scheme" : "bearer",
         "bearerFormat" : "JWT"
       }
+    },
+    "schemas": {
+      "ApiResponseOfGoodsList": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 1000
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoodsResponse"
+            }
+          }
+        }
+      },
+      "GoodsResponse": {
+        "type": "object",
+        "properties": {
+          "goodsId": {
+            "type": "string",
+            "example": "abc-123"
+          },
+          "goodsName": {
+            "type": "string",
+            "example": "Tai nghe Bluetooth"
+          },
+          "goodsCategory": {
+            "type": "string",
+            "example": "Âm thanh"
+          },
+          "goodsBrand": {
+            "type": "string",
+            "example": "Sony"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 1290000
+          }
+        }
+      }
+
     }
   },
   "paths" : {
@@ -1416,78 +1460,76 @@
         }
       }
     },
-    "/goods/{goodsId}" : {
-      "get" : {
-        "tags" : [ "Goods" ],
-        "description" : "Xem thông tin chi tiết sản phẩm",
-        "operationId" : "getGoodsById",
-        "parameters" : [ {
-          "name" : "goodsId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "example" : "1234"
+    "/goods/by-rating": {
+      "get": {
+        "tags": ["Goods"],
+        "description": "Lấy danh sách sản phẩm có điểm đánh giá trung bình >= min",
+        "operationId": "getGoodsByRating",
+        "parameters": [
+          {
+            "name": "min",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": 4.0
+            }
           }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Lấy thông tin sản phẩm thành công",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "object",
-                  "properties" : {
-                    "code" : {
-                      "type" : "integer",
-                      "example" : 1000
-                    },
-                    "result" : {
-                      "type" : "object",
-                      "properties" : {
-                        "goodsId" : {
-                          "type" : "string",
-                          "example" : "1234"
-                        },
-                        "goodsName" : {
-                          "type" : "string",
-                          "example" : "Laptop Dell"
-                        },
-                        "goodsVersion" : {
-                          "type" : "string",
-                          "example" : "1.0"
-                        },
-                        "quantity" : {
-                          "type" : "integer",
-                          "format" : "int64",
-                          "example" : 10
-                        },
-                        "price" : {
-                          "type" : "integer",
-                          "format" : "int64",
-                          "example" : 110822204
-                        },
-                        "goodsDescription" : {
-                          "type" : "string",
-                          "example" : "Mô tả sản phẩm"
-                        },
-                        "goodsCategory" : {
-                          "type" : "string",
-                          "example" : "Laptop"
-                        },
-                        "goodsImageUrl" : {
-                          "type" : "string",
-                          "example" : "1234"
-                        }
-                      }
-                    }
-                  }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách sản phẩm phù hợp",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfGoodsList"
                 }
               }
             }
           }
         }
-      },
+      }
+    },
+    "/goods/sort-name-asc": {
+      "get": {
+        "tags": ["Goods"],
+        "description": "Sắp xếp sản phẩm theo tên từ A đến Z",
+        "operationId": "getGoodsSortedByNameAsc",
+        "responses": {
+          "200": {
+            "description": "Danh sách sản phẩm A-Z",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfGoodsList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/goods/sort-name-desc": {
+      "get": {
+        "tags": ["Goods"],
+        "description": "Sắp xếp sản phẩm theo tên từ Z đến A",
+        "operationId": "getGoodsSortedByNameDesc",
+        "responses": {
+          "200": {
+            "description": "Danh sách sản phẩm Z-A",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfGoodsList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/goods/{goodsId}": {
       "delete" : {
         "tags" : [ "Goods" ],
         "description" : "Xóa sản phẩm (Yêu cầu quyền admin)",
@@ -1647,7 +1689,7 @@
         }
       }
     },
-    "/goods/goodsName" : {
+    "/goods/{goodsName}" : {
       "get" : {
         "tags" : [ "Goods" ],
         "description" : "Tìm kiếm sản phẩm theo tên",
@@ -1723,7 +1765,7 @@
         }
       }
     },
-    "/goods/goodsCategory" : {
+    "/goods/{goodsCategory}" : {
       "get" : {
         "tags" : [ "Goods" ],
         "description" : "Lọc sản phẩm theo danh mục",
@@ -1775,6 +1817,243 @@
                             "type" : "integer",
                             "format" : "int64",
                             "example" : 110822204
+                          },
+                          "goodsDescription" : {
+                            "type" : "string",
+                            "example" : "Mô tả sản phẩm"
+                          },
+                          "goodsCategory" : {
+                            "type" : "string",
+                            "example" : "Laptop"
+                          },
+                          "goodsImageUrl" : {
+                            "type" : "string",
+                            "example" : "1234"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/goods/by-id/{goodsId}" : {
+      "get" : {
+        "tags" : [ "Goods" ],
+        "description" : "Xem thông tin chi tiết sản phẩm",
+        "operationId" : "getGoodsById",
+        "parameters" : [ {
+          "name" : "goodsId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "1234"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Lấy thông tin sản phẩm thành công",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "example" : 1000
+                    },
+                    "result" : {
+                      "type" : "object",
+                      "properties" : {
+                        "goodsId" : {
+                          "type" : "string",
+                          "example" : "1234"
+                        },
+                        "goodsName" : {
+                          "type" : "string",
+                          "example" : "Laptop Dell"
+                        },
+                        "goodsVersion" : {
+                          "type" : "string",
+                          "example" : "1.0"
+                        },
+                        "quantity" : {
+                          "type" : "integer",
+                          "format" : "int64",
+                          "example" : 10
+                        },
+                        "price" : {
+                          "type" : "integer",
+                          "format" : "int64",
+                          "example" : 110822204
+                        },
+                        "goodsBrand": {
+                          "type": "string",
+                          "example": "Dell"
+                        },
+                        "goodsDescription" : {
+                          "type" : "string",
+                          "example" : "Mô tả sản phẩm"
+                        },
+                        "goodsCategory" : {
+                          "type" : "string",
+                          "example" : "Laptop"
+                        },
+                        "goodsImageUrl" : {
+                          "type" : "string",
+                          "example" : "1234"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/goods/by-brand/{goodsBrand}" : {
+      "get" : {
+        "tags" : [ "Goods" ],
+        "description" : "Lọc sản phẩm theo hãng",
+        "operationId" : "getGoodsByBrand",
+        "parameters" : [ {
+          "name" : "goodsBrand",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "Hãng A"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Lọc sản phẩm thành công",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "example" : 1000
+                    },
+                    "result" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object",
+                        "properties" : {
+                          "goodsId" : {
+                            "type" : "string",
+                            "example" : "1234"
+                          },
+                          "goodsName" : {
+                            "type" : "string",
+                            "example" : "Laptop Dell"
+                          },
+                          "goodsVersion" : {
+                            "type" : "string",
+                            "example" : "1.0"
+                          },
+                          "quantity" : {
+                            "type" : "integer",
+                            "format" : "int64",
+                            "example" : 10
+                          },
+                          "price" : {
+                            "type" : "integer",
+                            "format" : "int64",
+                            "example" : 110822204
+                          },
+                          "goodsBrand": {
+                            "type": "string",
+                            "example": "Dell"
+                          },
+                          "goodsDescription" : {
+                            "type" : "string",
+                            "example" : "Mô tả sản phẩm"
+                          },
+                          "goodsCategory" : {
+                            "type" : "string",
+                            "example" : "Laptop"
+                          },
+                          "goodsImageUrl" : {
+                            "type" : "string",
+                            "example" : "1234"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/goods/by-price/{goodsPrice}" : {
+      "get" : {
+        "tags" : [ "Goods" ],
+        "description" : "Lọc sản phẩm theo giá cố định",
+        "operationId" : "getGoodsByPrice",
+        "parameters" : [ {
+          "name" : "goodsPrice",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "example" : 15000000
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Lọc sản phẩm thành công",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "example" : 1000
+                    },
+                    "result" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object",
+                        "properties" : {
+                          "goodsId" : {
+                            "type" : "string",
+                            "example" : "1234"
+                          },
+                          "goodsName" : {
+                            "type" : "string",
+                            "example" : "Laptop Dell"
+                          },
+                          "goodsVersion" : {
+                            "type" : "string",
+                            "example" : "1.0"
+                          },
+                          "quantity" : {
+                            "type" : "integer",
+                            "format" : "int64",
+                            "example" : 10
+                          },
+                          "price" : {
+                            "type" : "integer",
+                            "format" : "int64",
+                            "example" : 110822204
+                          },
+                          "goodsBrand": {
+                            "type": "string",
+                            "example": "Dell"
                           },
                           "goodsDescription" : {
                             "type" : "string",
@@ -2806,107 +3085,77 @@
 
     "/orders/create": {
       "post": {
-        "tags": [ "Order" ],
-        "description": "Tạo đơn hàng mới",
+        "tags": [
+          "Order"
+        ],
+        "summary": "Place a new order",
+        "description": "Creates a new order in the system",
         "operationId": "placeOrder",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "items": {
+                  "orderItems": {
                     "type": "array",
-                    "description": "Danh sách sản phẩm trong đơn hàng",
                     "items": {
                       "type": "object",
                       "properties": {
                         "goodsId": {
-                          "type": "string",
-                          "description": "ID sản phẩm"
+                          "type": "string"
                         },
                         "quantity": {
-                          "type": "integer",
-                          "description": "Số lượng"
+                          "type": "integer"
                         }
-                      }
+                      },
+                      "required": ["goodsId", "quantity"]
                     }
                   },
-                  "shippingAddress": {
-                    "type": "object",
-                    "properties": {
-                      "street": { "type": "string" },
-                      "city": { "type": "string" },
-                      "state": { "type": "string" },
-                      "country": { "type": "string" }
-                    }
-                  },
-                  "paymentMethod": {
-                    "type": "string",
-                    "description": "Phương thức thanh toán"
+                  "address": {
+                    "type": "string"
                   },
                   "voucherId": {
-                    "type": "string",
-                    "description": "ID voucher áp dụng (nếu có)"
+                    "type": "string"
                   },
-                  "notes": {
-                    "type": "string",
-                    "description": "Ghi chú thêm cho đơn hàng"
+                  "paymentMethod": {
+                    "type": "string"
+                  },
+                  "totalPrice": {
+                    "type": "integer"
+                  },
+                  "totalDiscount": {
+                    "type": "integer"
                   }
-                }
+                },
+                "required": [
+                  "orderItems",
+                  "address",
+                  "paymentMethod",
+                  "totalPrice",
+                  "totalDiscount"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Tạo đơn hàng thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": { "type": "string", "description": "Order ID" },
-                    "userId": { "type": "string", "description": "ID người đặt" },
-                    "userName": { "type": "string", "description": "Tên người đặt" },
-                    "orderDate": { "type": "string", "format": "date-time" },
-                    "status": { "type": "string" },
-                    "paymentStatus": { "type": "string" },
-                    "totalPrice": { "type": "integer", "format": "int64" },
-                    "totalDiscount": { "type": "integer", "format": "int64" },
-                    "shippingAddress": {
-                      "type": "object",
-                      "properties": {
-                        "street": { "type": "string" },
-                        "city": { "type": "string" },
-                        "state": { "type": "string" },
-                        "country": { "type": "string" }
-                      }
-                    },
-                    "paymentMethod": { "type": "string" },
-                    "transactionId": { "type": "string" },
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "goodsId": { "type": "string" },
-                          "goodsName": { "type": "string" },
-                          "quantity": { "type": "integer" },
-                          "price": { "type": "integer", "format": "int64" },
-                          "status": { "type": "string" }
-                        }
-                      }
-                    },
-                    "notes": { "type": "string" }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Có lỗi khi tạo đơn hàng",
+            "description": "Order created successfully"
+          }
+        }
+      }
+    },
+    "/orders/update-item-status/{orderItemId}": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "description": "New endpoint",
+        "responses": {
+          "200": {
+            "description": "New response",
             "content": {
               "application/json": {
                 "schema": {
@@ -2916,9 +3165,7 @@
             }
           }
         }
-      }
-    },
-    "/orders/update-item-status/{orderItemId}": {
+      },
       "put": {
         "tags": ["Order"],
         "summary": "Update order item status",
@@ -2988,24 +3235,7 @@
                       "description": "Total amount of the order"
                     },
                     "shippingAddress": {
-                      "type": "object",
-                      "properties": {
-                        "street": {
-                          "type": "string"
-                        },
-                        "city": {
-                          "type": "string"
-                        },
-                        "state": {
-                          "type": "string"
-                        },
-                        "zipCode": {
-                          "type": "string"
-                        },
-                        "country": {
-                          "type": "string"
-                        }
-                      }
+                      "type": "string"   
                     },
                     "paymentMethod": {
                       "type": "string"
@@ -3136,7 +3366,15 @@
             "required": true,
             "description": "Trạng thái mới của đơn hàng",
             "schema": {
-              "type": "string"
+              "type": "string",
+                "enum": [
+                  "PENDING",
+                  "CONFIRMED",
+                  "SHIPPING",
+                  "DELIVERED",
+                  "CANCELLED",
+                  "PROCESSING"
+                ]
             }
           }
         ],
@@ -3189,7 +3427,8 @@
             "required": true,
             "description": "Trạng thái thanh toán mới",
             "schema": {
-              "type": "string"
+              "type": "string",
+                "enum": ["PENDING", "PROCESSING", "PAID", "CONFIRMED", "FAILED", "CANCELLED"]
             }
           }
         ],
@@ -3236,23 +3475,14 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": { "type": "string" },
-                      "userId": { "type": "string" },
+                      "id": { "type": "string" },          
                       "userName": { "type": "string" },
                       "orderDate": { "type": "string", "format": "date-time" },
                       "status": { "type": "string" },
                       "paymentStatus": { "type": "string" },
                       "totalPrice": { "type": "integer", "format": "int64" },
                       "totalDiscount": { "type": "integer", "format": "int64" },
-                      "shippingAddress": {
-                        "type": "object",
-                        "properties": {
-                          "street": { "type": "string" },
-                          "city": { "type": "string" },
-                          "state": { "type": "string" },
-                          "country": { "type": "string" }
-                        }
-                      },
+                      "shippingAddress": { "type": "string"},
                       "paymentMethod": { "type": "string" },
                       "transactionId": { "type": "string" },
                       "items": {
@@ -3261,8 +3491,19 @@
                           "type": "object",
                           "properties": {
                             "id": { "type": "string" },
-                            "goodsId": { "type": "string" },
-                            "goodsName": { "type": "string" },
+                            "goods":{
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "string" },
+                                "name": { "type": "string" },
+                                "price": { "type": "integer", "format": "int64" },
+                                "quantity": { "type": "integer" },
+                                "goodsVersion": { "type": "string" },
+                                "goodsDescription": { "type": "string" },
+                                "goodsCategory": { "type": "string" },
+                                "goodsImageURL": { "type": "string" }
+                              }
+                            },
                             "quantity": { "type": "integer" },
                             "price": { "type": "integer", "format": "int64" },
                             "status": { "type": "string" }
@@ -3291,7 +3532,15 @@
             "required": true,
             "description": "Trạng thái đơn hàng",
             "schema": {
-              "type": "string"
+              "type": "string",
+                "enum": [
+                  "PENDING",
+                  "CONFIRMED",
+                  "SHIPPING",
+                  "DELIVERED",
+                  "CANCELLED",
+                  "PROCESSING"
+                ]
             }
           }
         ],
@@ -3314,84 +3563,9 @@
                       "totalPrice": { "type": "integer", "format": "int64" },
                       "totalDiscount": { "type": "integer", "format": "int64" },
                       "shippingAddress": {
-                        "type": "object",
-                        "properties": {
-                          "street": { "type": "string" },
-                          "city": { "type": "string" },
-                          "state": { "type": "string" },
-                          "country": { "type": "string" }
-                        }
+                        "type": "string"                    
                       },
-                      "paymentMethod": { "type": "string" },
-                      "transactionId": { "type": "string" },
-                      "items": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "id": { "type": "string" },
-                            "goodsId": { "type": "string" },
-                            "goodsName": { "type": "string" },
-                            "quantity": { "type": "integer" },
-                            "price": { "type": "integer", "format": "int64" },
-                            "status": { "type": "string" }
-                          }
-                        }
-                      },
-                      "notes": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/orders/user/{userId}": {
-      "get": {
-        "tags": [ "Order" ],
-        "description": "Lấy đơn hàng theo userId",
-        "operationId": "getOrdersByUserId",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "description": "ID của người dùng",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lấy đơn hàng theo userId thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": { "type": "string" },
-                      "userId": { "type": "string" },
-                      "userName": { "type": "string" },
-                      "orderDate": { "type": "string", "format": "date-time" },
-                      "status": { "type": "string" },
-                      "paymentStatus": { "type": "string" },
-                      "totalPrice": { "type": "integer", "format": "int64" },
-                      "totalDiscount": { "type": "integer", "format": "int64" },
-                      "shippingAddress": {
-                        "type": "object",
-                        "properties": {
-                          "street": { "type": "string" },
-                          "city": { "type": "string" },
-                          "state": { "type": "string" },
-                          "country": { "type": "string" }
-                        }
-                      },
-                      "paymentMethod": { "type": "string" },
+                      "paymentMethod": { "type": "" },
                       "transactionId": { "type": "string" },
                       "items": {
                         "type": "array",
@@ -3494,7 +3668,9 @@
 
     "/zalopay/create-order": {
       "post": {
-        "tags": ["Payment"],
+        "tags": [
+          "Payment"
+        ],
         "summary": "Create Zalopay payment order",
         "description": "Creates a payment order in the Zalopay payment gateway",
         "operationId": "createOrder",
@@ -3503,30 +3679,26 @@
           "content": {
             "application/json": {
               "schema": {
-                "type" : "object",
-                "required" : [ "amount" ],
-                "properties" : {
-                  "amount" : {
-                    "type" : "number",
-                    "description" : "Amount to pay (in VND)"
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "integer",
+                    "description": "Amount to pay (in VND)"
                   },
-                  "orderId" : {
-                    "type" : "string",
-                    "description" : "ID of the order in the system"
+                  "orderInfo": {
+                    "type": "string",
+                    "description": "Order information/description"
                   },
-                  "description" : {
-                    "type" : "string",
-                    "description" : "Description of the payment"
-                  },
-                  "bankCode" : {
-                    "type" : "string",
-                    "description" : "Bank code for direct banking (optional)"
-                  },
-                  "embedData" : {
-                    "type" : "object",
-                    "description" : "Additional data to embed in the order"
+                  "orderType": {
+                    "type": "string",
+                    "description": "Type of the order"
                   }
-                }
+                },
+                "required": [
+                  "amount",
+                  "orderInfo",
+                  "orderType"
+                ]
               }
             }
           }
@@ -3537,66 +3709,29 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type" : "object",
-                  "properties" : {
-                    "return_code" : {
-                      "type" : "integer",
-                      "description" : "Response code from Zalopay (1: success)"
+                  "type": "object",
+                  "properties": {
+                    "return_code": {
+                      "type": "integer"
                     },
-                    "return_message" : {
-                      "type" : "string",
-                      "description" : "Response message"
+                    "return_message": {
+                      "type": "string"
                     },
-                    "sub_return_code" : {
-                      "type" : "integer",
-                      "description" : "Sub-response code"
+                    "sub_return_code": {
+                      "type": "integer"
                     },
-                    "sub_return_message" : {
-                      "type" : "string",
-                      "description" : "Sub-response message"
+                    "sub_return_message": {
+                      "type": "string"
                     },
-                    "order_url" : {
-                      "type" : "string",
-                      "description" : "URL to redirect user for payment"
+                    "zp_trans_token": {
+                      "type": "string"
                     },
-                    "zp_trans_token" : {
-                      "type" : "string",
-                      "description" : "Zalopay transaction token"
+                    "order_url": {
+                      "type": "string"
                     },
-                    "app_trans_id" : {
-                      "type" : "string",
-                      "description" : "Application transaction ID"
-                    },
-                    "qr_code" : {
-                      "type" : "string",
-                      "description" : "QR code data for payment (if requested)"
+                    "order_token": {
+                      "type": "string"
                     }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - Missing required parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": { "type": "string" }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": { "type": "string" }
                   }
                 }
               }

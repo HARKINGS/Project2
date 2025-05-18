@@ -3,6 +3,7 @@ package com.harkins.startYourEngine.entity;
 import com.harkins.startYourEngine.enums.OrderStatus;
 import com.harkins.startYourEngine.enums.PaymentStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,10 +29,6 @@ public class Order {
     @JoinColumn(name = "voucherId")
     Voucher voucher;
 
-    @OneToOne
-    @JoinColumn(name = "userId")
-    User user;
-
     String shippingAddress;
 
     @Enumerated(EnumType.STRING)
@@ -42,9 +39,14 @@ public class Order {
 
     String paymentMethod;
 
-    Double totalPrice;
-    Double totalDiscount;
+    @Positive
+    Long totalPrice;
+
+    @Positive
+    Long totalDiscount;
 
     @Column(nullable = true)
     String transactionId;
+
+    String username;
 }
