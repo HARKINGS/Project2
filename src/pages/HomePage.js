@@ -12,9 +12,9 @@ const products = [
 ];
 
 const banners = [
-  'https://via.placeholder.com/1200x400?text=Big+Sale+Up+to+50%25+Off',
-  'https://via.placeholder.com/1200x400?text=New+Arrivals+2025',
-  'https://via.placeholder.com/1200x400?text=Free+Shipping+This+Week',
+  'https://placehold.co/1200x400?text=Big+Sale+Up+to+50%25+Off&font=arial',
+  'https://placehold.co/1200x400?text=New+Arrivals+2025&font=arial',
+  'https://placehold.co/1200x400?text=Free+Shipping+This+Week&font=arial',
 ];
 
 const stores = [
@@ -27,6 +27,16 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const [chatBotOpen, setChatBotOpen] = useState(false);
+  const [chatBotMessages, setChatBotMessages] = useState([]);
+  const [botMessage, setBotMessage] = useState('');
+  const [isBotSending, setIsBotSending] = useState(false);
+  const [botError, setBotError] = useState(null);
+  const [chatStaffOpen, setChatStaffOpen] = useState(false);
+  const [chatStaffMessages, setChatStaffMessages] = useState([]);
+  const [staffMessage, setStaffMessage] = useState('');
+  const [isStaffSending, setIsStaffSending] = useState(false);
+  const [staffError, setStaffError] = useState(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -46,33 +56,60 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
     }
   };
 
-  const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    phone: '',
-    paymentMethod: 'COD',
-  });
+  const handleSendBotMessage = async () => {
+    if (!botMessage.trim() || isBotSending) return;
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    setIsBotSending(true);
+    setBotError(null);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const userMessage = { text: botMessage, sender: 'user', time: new Date().toLocaleTimeString() };
+    setChatBotMessages((prev) => [...prev, userMessage]);
+    setBotMessage('');
+
+    try {
+      const response = await fetch('https://your-backend-api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: botMessage }),
+      });
+      if (!response.ok) throw new Error('Failed to send message');
+      const data = await response.json();
+      const botReply = { text: data.reply, sender: 'bot', time: new Date().toLocaleTimeString() };
+      setChatBotMessages((prev) => [...prev, botReply]);
+    } catch (err) {
+      setBotError('Error sending message. Please try again.');
+      console.error(err);
+    } finally {
+      setIsBotSending(false);
+    }
   };
 
-  const handleCheckout = () => {
-    if (cartItems.length === 0) {
-      alert('Your cart is empty!');
-      return;
+  const handleSendStaffMessage = async () => {
+    if (!staffMessage.trim() || isStaffSending) return;
+
+    setIsStaffSending(true);
+    setStaffError(null);
+
+    const userMessage = { text: staffMessage, sender: 'user', time: new Date().toLocaleTimeString() };
+    setChatStaffMessages((prev) => [...prev, userMessage]);
+    setStaffMessage('');
+
+    try {
+      const response = await fetch('https://your-backend-api/staff-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: staffMessage }),
+      });
+      if (!response.ok) throw new Error('Failed to send message');
+      const data = await response.json();
+      const staffReply = { text: data.reply, sender: 'staff', time: new Date().toLocaleTimeString() };
+      setChatStaffMessages((prev) => [...prev, staffReply]);
+    } catch (err) {
+      setStaffError('Error sending message. Please try again.');
+      console.error(err);
+    } finally {
+      setIsStaffSending(false);
     }
-    const orderData = {
-      items: cartItems,
-      total: total,
-      customer: formData,
-    };
-    console.log('Sending order to backend:', orderData);
-    alert('Order placed successfully! (Simulated)');
-    setCartItems([]);
   };
 
   const categories = ['All', 'Electronics', 'Fashion'];
@@ -177,6 +214,91 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Chat Widgets */}
+      <div className="fixed bottom-4 right-4 flex space-x-4">
+        {/* Chat with Bot */}
+        <div className="bg-white shadow-lg rounded-lg p-4 w-80 min-w-[300px] max-w-[500px] min-h-[100px] max-h-[600px] resize overflow-auto">
+          <div
+            className="flex justify-between items-center mb-2 cursor-pointer"
+            onClick={() => setChatBotOpen(!chatBotOpen)}
+          >
+            <h3 className="text-lg font-semibold">Chat with Bot</h3>
+          </div>
+          {chatBotOpen && (
+            <>
+              <div className="h-40 overflow-y-auto border p-2 mb-2 bg-gray-100">
+                {chatBotMessages.map((msg, index) => (
+                  <div key={index} className={`mb-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                    <span className={`p-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-200' : 'bg-gray-200'}`}>
+                      {msg.text} <small className="text-gray-500">({msg.time})</small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {botError && <p className="text-red-600 mb-2">{botError}</p>}
+              <div className="flex">
+                <input
+                  type="text"
+                  value={botMessage}
+                  onChange={(e) => setBotMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="w-full p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isBotSending}
+                />
+                <button
+                  onClick={handleSendBotMessage}
+                  className="bg-blue-600 text-white p-2 rounded-r-md hover:bg-blue-700"
+                  disabled={isBotSending}
+                >
+                  {isBotSending ? 'Sending...' : 'Send'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Chat with Staff */}
+        <div className="bg-white shadow-lg rounded-lg p-4 w-80 min-w-[300px] max-w-[500px] min-h-[100px] max-h-[600px] resize overflow-auto">
+          <div
+            className="flex justify-between items-center mb-2 cursor-pointer"
+            onClick={() => setChatStaffOpen(!chatStaffOpen)}
+          >
+            <h3 className="text-lg font-semibold">Chat with Staff</h3>
+          </div>
+          {chatStaffOpen && (
+            <>
+              <div className="h-40 overflow-y-auto border p-2 mb-2 bg-gray-100">
+                {chatStaffMessages.map((msg, index) => (
+                  <div key={index} className={`mb-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                    <span className={`p-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-200' : 'bg-gray-200'}`}>
+                      {msg.text} <small className="text-gray-500">({msg.time})</small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {staffError && <p className="text-red-600 mb-2">{staffError}</p>}
+              <div className="flex">
+                <input
+                  type="text"
+                  value={staffMessage}
+                  onChange={(e) => setStaffMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="w-full p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isStaffSending}
+                />
+                <button
+                  onClick={handleSendStaffMessage}
+                  className="bg-blue-600 text-white p-2 rounded-r-md hover:bg-blue-700"
+                  disabled={isStaffSending}
+                >
+                  {isStaffSending ? 'Sending...' : 'Send'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
