@@ -16,26 +16,42 @@ const AdminStaff = () => {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "", // Mặc định là số điện thoại không hợp lệ
     role: "staff", // Mặc định là staff, có thể thay đổi
     dob: "", // Thêm trường dob
   });
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true); // Thêm trạng thái loading
 
   // Lấy danh sách tài khoản
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getUsers();
-        setUsers(data.result || []);
-      } catch (error) {
-        setError("Failed to load users. Please check your token or try again.");
-        console.error("Error fetching users:", error);
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const data = await getUsers();
+      if (data.code !== 1000) {
+        throw new Error(data.message || "Lấy danh sách tài khoản thất bại");
       }
-    };
+      setUsers(data.result || []);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      if (error.response?.status === 401) {
+        setError("Phiên làm việc hết hạn. Vui lòng đăng nhập lại.");
+        navigate("/login"); // Redirect về trang login nếu token không hợp lệ
+      } else {
+        setError(
+          "Không thể tải danh sách tài khoản. Vui lòng kiểm tra token hoặc thử lại."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [navigate]);
 
   const validateDob = (dob) => {
     const today = new Date();
@@ -54,12 +70,12 @@ const AdminStaff = () => {
   const handleAddUser = async (e) => {
     e.preventDefault();
     if (!newUser.dob) {
-      setError("Please select a date of birth.");
+      setError("Vui lòng chọn ngày sinh.");
       return;
     }
     const age = validateDob(newUser.dob);
     if (age < 18) {
-      setError("User must be at least 18 years old.");
+      setError("Người dùng phải ít nhất 18 tuổi.");
       return;
     }
     try {
@@ -68,7 +84,7 @@ const AdminStaff = () => {
         password: newUser.password,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
-        phone: newUser.phone,
+        phoneNumber: newUser.phoneNumber,
         email: newUser.email,
         dob: newUser.dob,
       };
@@ -78,36 +94,38 @@ const AdminStaff = () => {
         await registerUserRole(userData);
       }
 
-      toast.success("User added successfully!");
+      // Thông báo hiển thị trên giao diện tạo tài khoản thành công
+      toast.success("Tài khoản đã được thêm thành công!");
 
-      const updatedUsers = await getUsers();
-      setUsers(updatedUsers.result || []);
+      await fetchUsers(); // Cập nhật danh sách sau khi thêm
       setNewUser({
         username: "",
         password: "",
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
+        phoneNumber: "",
         role: "staff",
         dob: "",
       });
       setError(null);
     } catch (error) {
-      setError("Error adding user. Please check your input or token.");
       console.error("Error adding user:", error);
+      setError(
+        "Lỗi khi thêm tài khoản. Vui lòng kiểm tra thông tin hoặc token."
+      );
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm("Are you sure to delete?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa?")) {
       try {
         await deleteUser(userId);
         setUsers(users.filter((u) => u.userId !== userId));
         setError(null);
       } catch (error) {
-        setError("Error deleting user. Please try again.");
         console.error("Error deleting user:", error);
+        setError("Lỗi khi xóa tài khoản. Vui lòng thử lại.");
       }
     }
   };
@@ -116,6 +134,7 @@ const AdminStaff = () => {
     <div className="container mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Accounts</h1>
       {error && <p className="text-red-600 mb-4">{error}</p>}
+      {loading && <p className="text-gray-600 mb-4">Đang tải...</p>}
       <form
         onSubmit={handleAddUser}
         className="mb-4 bg-white p-6 rounded-lg shadow-md"
@@ -164,9 +183,11 @@ const AdminStaff = () => {
           />
           <input
             type="text"
-            placeholder="Phone"
-            value={newUser.phone}
-            onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+            placeholder="Phone Number"
+            value={newUser.phoneNumber}
+            onChange={(e) =>
+              setNewUser({ ...newUser, phoneNumber: e.target.value })
+            }
             className="w-full p-3 border rounded-md"
           />
           <input
@@ -195,6 +216,7 @@ const AdminStaff = () => {
           <button
             type="submit"
             className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+            disabled={loading}
           >
             Add Account
           </button>
@@ -202,38 +224,48 @@ const AdminStaff = () => {
       </form>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4">Account List</h2>
-        {users.map((user) => (
-          <div
-            key={user.userId}
-            className="flex items-center justify-between border-b py-4"
-          >
-            <div>
-              <span>
-                ID: {user.userId}
-                <br />
-                Username: {user.username}
-                <br />
-                Name: {user.lastName} {user.firstName}
-                <br />
-                DOB:{" "}
-                {user.dob ? new Date(user.dob).toLocaleDateString() : "N/A"}
-                <br />
-                Role:{" "}
-                {user.roles && user.roles.length > 0
-                  ? user.roles[0].name
-                  : "N/A"}
-              </span>
+        {loading ? (
+          <p className="text-gray-600">Đang tải danh sách...</p>
+        ) : users.length === 0 ? (
+          <p className="text-gray-500">Không có tài khoản nào.</p>
+        ) : (
+          users.map((user) => (
+            <div
+              key={user.userId}
+              className="flex items-center justify-between border-b py-4"
+            >
+              <div>
+                <span>
+                  ID: {user.userId}
+                  <br />
+                  Username: {user.username}
+                  <br />
+                  Name: {user.lastName} {user.firstName}
+                  <br />
+                  DOB:{" "}
+                  {user.dob ? new Date(user.dob).toLocaleDateString() : "N/A"}
+                  <br />
+                  Email: {user.email || "N/A"}
+                  <br />
+                  Phone Number: {user.phoneNumber || "N/A"} <br />
+                  Role:{" "}
+                  {user.roles && user.roles.length > 0
+                    ? user.roles[0].name
+                    : "N/A"}
+                </span>
+              </div>
+              <div>
+                <button
+                  onClick={() => handleDeleteUser(user.userId)}
+                  className="text-red-600 hover:text-red-800"
+                  disabled={loading}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div>
-              <button
-                onClick={() => handleDeleteUser(user.userId)}
-                className="text-red-600 hover:text-red-800"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

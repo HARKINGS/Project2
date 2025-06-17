@@ -212,19 +212,12 @@ const AdminProducts = () => {
     setEditProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setNewProduct((prev) => ({ ...prev, goodsImageURL: imageUrl }));
-    }
-  };
-
-  const handleEditImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setEditProduct((prev) => ({ ...prev, goodsImageURL: imageUrl }));
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
     }
   };
 
@@ -322,35 +315,41 @@ const AdminProducts = () => {
           />
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL hoặc tải ảnh sản phẩm
+              URL ảnh sản phẩm (từ mạng)
             </label>
             <input
               type="text"
               name="goodsImageURL"
-              placeholder="Nhập URL ảnh (từ mạng) hoặc để trống để tải ảnh"
+              placeholder="Nhập URL ảnh (ví dụ: https://tokusatsu-network.com/wp-content/uploads/2024/06/Next-Time-on-Kamen-Rider-Gaim-Episode-46-–-The-Fallen-Leaves-Return-to-the-Branches-Tim-hieu-them-597x266.jpg)"
               value={newProduct.goodsImageURL}
               onChange={handleInputChange}
               className="p-3 border rounded-md w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="p-3 border rounded-md w-full"
-            />
-            {newProduct.goodsImageURL && (
-              <img
-                src={newProduct.goodsImageURL}
-                alt="Preview"
-                className="mt-2 w-32 h-32 object-cover rounded"
-              />
-            )}
+            {newProduct.goodsImageURL &&
+              isValidUrl(newProduct.goodsImageURL) && (
+                <img
+                  src={newProduct.goodsImageURL}
+                  alt="Preview"
+                  className="mt-2 w-32 h-32 object-cover rounded"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/100";
+                    toast.error("URL ảnh không hợp lệ!");
+                  }}
+                />
+              )}
+            {!isValidUrl(newProduct.goodsImageURL) &&
+              newProduct.goodsImageURL && (
+                <p className="text-red-500 mt-2">URL không hợp lệ!</p>
+              )}
           </div>
         </div>
         <button
           type="submit"
           className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400"
-          disabled={loading}
+          disabled={
+            loading ||
+            (!isValidUrl(newProduct.goodsImageURL) && newProduct.goodsImageURL)
+          }
         >
           {loading ? "Đang thêm..." : "Thêm sản phẩm"}
         </button>
@@ -427,36 +426,43 @@ const AdminProducts = () => {
             />
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL hoặc tải ảnh sản phẩm
+                URL ảnh sản phẩm (từ mạng)
               </label>
               <input
                 type="text"
                 name="goodsImageURL"
-                placeholder="Nhập URL ảnh (từ mạng) hoặc để trống để tải ảnh"
+                placeholder="Nhập URL ảnh (ví dụ: https://tokusatsu-network.com/wp-content/uploads/2024/06/Next-Time-on-Kamen-Rider-Gaim-Episode-46-–-The-Fallen-Leaves-Return-to-the-Branches-Tim-hieu-them-597x266.jpg)"
                 value={editProduct.goodsImageURL}
                 onChange={handleEditInputChange}
                 className="p-3 border rounded-md w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleEditImageChange}
-                className="p-3 border rounded-md w-full"
-              />
-              {editProduct.goodsImageURL && (
-                <img
-                  src={editProduct.goodsImageURL}
-                  alt="Preview"
-                  className="mt-2 w-32 h-32 object-cover rounded"
-                />
-              )}
+              {editProduct.goodsImageURL &&
+                isValidUrl(editProduct.goodsImageURL) && (
+                  <img
+                    src={editProduct.goodsImageURL}
+                    alt="Preview"
+                    className="mt-2 w-32 h-32 object-cover rounded"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/100";
+                      toast.error("URL ảnh không hợp lệ!");
+                    }}
+                  />
+                )}
+              {!isValidUrl(editProduct.goodsImageURL) &&
+                editProduct.goodsImageURL && (
+                  <p className="text-red-500 mt-2">URL không hợp lệ!</p>
+                )}
             </div>
           </div>
           <div className="mt-4 flex space-x-2">
             <button
               type="submit"
               className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-              disabled={loading}
+              disabled={
+                loading ||
+                (!isValidUrl(editProduct.goodsImageURL) &&
+                  editProduct.goodsImageURL)
+              }
             >
               {loading ? "Đang cập nhật..." : "Cập nhật sản phẩm"}
             </button>
@@ -488,6 +494,10 @@ const AdminProducts = () => {
                     }
                     alt={product.goodsName}
                     className="w-16 h-16 object-cover mr-4 rounded"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/100";
+                      toast.error("URL ảnh không hợp lệ!");
+                    }}
                   />
                   <div>
                     <h3 className="text-lg font-semibold">
