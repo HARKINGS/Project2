@@ -1,32 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-
-const products = [
-  { id: 1, name: 'Laptop Pro', price: 1299.99, category: 'Electronics' },
-  { id: 2, name: 'Smartphone X', price: 699.99, category: 'Electronics' },
-  { id: 3, name: 'Running Shoes', price: 89.99, category: 'Fashion' },
-  { id: 4, name: 'Winter Jacket', price: 149.99, category: 'Fashion' },
-  { id: 5, name: 'Gaming Mouse', price: 49.99, category: 'Electronics' },
-  { id: 6, name: 'Casual Sneakers', price: 59.99, category: 'Fashion' },
-];
-
-const banners = [
-  'https://placehold.co/1200x400?text=Big+Sale+Up+to+50%25+Off&font=arial',
-  'https://placehold.co/1200x400?text=New+Arrivals+2025&font=arial',
-  'https://placehold.co/1200x400?text=Free+Shipping+This+Week&font=arial',
-];
-
-const stores = [
-  { id: 1, name: 'Main Store', location: 'Hanoi' },
-  { id: 2, name: 'Branch Store', location: 'Ho Chi Minh City' },
-];
+import { getAllGoods, getGoodsById } from '../api/Goods';
 
 const HomePage = ({ addToCart, cartItems, setCartItems }) => {
+  const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const productsPerPage = 8;
+  const navigate = useNavigate();
   const [currentBanner, setCurrentBanner] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
   const [chatBotOpen, setChatBotOpen] = useState(false);
   const [chatBotMessages, setChatBotMessages] = useState([]);
   const [botMessage, setBotMessage] = useState('');
@@ -38,6 +23,17 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
   const [isStaffSending, setIsStaffSending] = useState(false);
   const [staffError, setStaffError] = useState(null);
 
+  const banners = [
+    'https://placehold.co/1200x400?text=Big+Sale+Up+to+50%25+Off&font=arial',
+    'https://placehold.co/1200x400?text=New+Arrivals+2025&font=arial',
+    'https://placehold.co/1200x400?text=Free+Shipping+This+Week&font=arial',
+  ];
+
+  const stores = [
+    { id: 1, name: 'Main Store', location: 'Hanoi' },
+    { id: 2, name: 'Branch Store', location: 'Ho Chi Minh City' },
+  ];
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
@@ -45,27 +41,111 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter((product) => product.category === selectedCategory);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      try {
+        const data = await getAllGoods();
+        console.log('API Response:', data); // Debug response
+        if (data.code === 1000 && Array.isArray(data.result)) {
+          setProducts(data.result.map(p => ({
+            id: p.goodsId,
+            name: p.goodsName,
+            price: p.price,
+            category: p.goodsCategory,
+            imageURL: p.goodsImageUrl || 'https://via.placeholder.com/400x400',
+            stock: p.quantity,
+            description: p.goodsDescription || 'No description available',
+            brand: p.goodsBrand,
+            version: p.goodsVersion,
+          })));
+          setTotalPages(Math.ceil(data.result.length / productsPerPage));
+        } else {
+          throw new Error('Unexpected API response format');
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        alert('Failed to load products. Please login or try again.');
+      }
+    };
+    fetchProducts();
+  }, []);
 
-  const handleSearch = (e) => {
+  // Lọc sản phẩm theo category và search
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+    const matchesSearch = !searchQuery.trim() || product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // Phân trang với "..." cho nhiều trang
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const renderPagination = () => {
+    const pageNumbers = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+    } else {
+      pageNumbers.push(1);
+      if (currentPage > 3) pageNumbers.push('...');
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
+      if (currentPage < totalPages - 2) pageNumbers.push('...');
+      pageNumbers.push(totalPages);
+    }
+    return pageNumbers.map((number, index) => (
+      <button
+        key={index}
+        onClick={() => typeof number === 'number' && paginate(number)}
+        className={`mx-1 px-3 py-1 rounded-full ${currentPage === number ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'}`}
+        disabled={number === '...'}
+      >
+        {number}
+      </button>
+    ));
+  };
+
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+      try {
+        const data = await getAllGoods(); // Giả sử API hỗ trợ tìm kiếm
+        const filtered = data.result.filter(p => p.goodsName.toLowerCase().includes(searchQuery.toLowerCase()));
+        setProducts(filtered.map(p => ({
+          id: p.goodsId,
+          name: p.goodsName,
+          price: p.price,
+          category: p.goodsCategory,
+          imageURL: p.goodsImageUrl || 'https://via.placeholder.com/400x400',
+          stock: p.quantity,
+          description: p.goodsDescription || 'No description available',
+          brand: p.goodsBrand,
+          version: p.goodsVersion,
+        })));
+        setTotalPages(Math.ceil(filtered.length / productsPerPage));
+        setCurrentPage(1);
+      } catch (error) {
+        console.error('Error searching products:', error);
+        alert('Failed to search products.');
+      }
     }
   };
 
   const handleSendBotMessage = async () => {
     if (!botMessage.trim() || isBotSending) return;
-
     setIsBotSending(true);
     setBotError(null);
-
     const userMessage = { text: botMessage, sender: 'user', time: new Date().toLocaleTimeString() };
     setChatBotMessages((prev) => [...prev, userMessage]);
     setBotMessage('');
-
     try {
       const response = await fetch('https://your-backend-api/chat', {
         method: 'POST',
@@ -86,14 +166,11 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
 
   const handleSendStaffMessage = async () => {
     if (!staffMessage.trim() || isStaffSending) return;
-
     setIsStaffSending(true);
     setStaffError(null);
-
     const userMessage = { text: staffMessage, sender: 'user', time: new Date().toLocaleTimeString() };
     setChatStaffMessages((prev) => [...prev, userMessage]);
     setStaffMessage('');
-
     try {
       const response = await fetch('https://your-backend-api/staff-chat', {
         method: 'POST',
@@ -112,7 +189,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
     }
   };
 
-  const categories = ['All', 'Electronics', 'Fashion'];
+  const categories = ['All', ...new Set(products.map(p => p.category))]; // Lấy category từ API
 
   return (
     <div className="bg-gray-50">
@@ -171,7 +248,10 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
             {categories.map((category) => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setCurrentPage(1);
+                }}
                 className={`px-6 py-3 rounded-full text-lg font-medium transition duration-300 ${
                   selectedCategory === category
                     ? 'bg-blue-600 text-white shadow-md'
@@ -188,9 +268,20 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-6 text-gray-800">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <Link to={`/product/${product.id}`} key={product.id}>
+            {currentProducts.length > 0 ? (
+              currentProducts.map((product) => (
+                <Link
+                  to={`/product/${product.id}`}
+                  key={product.id}
+                  onClick={async () => {
+                    try {
+                      const data = await getGoodsById(product.id);
+                      localStorage.setItem('productDetail', JSON.stringify(data));
+                    } catch (error) {
+                      console.error('Error fetching product details:', error);
+                    }
+                  }}
+                >
                   <ProductCard product={product} addToCart={() => addToCart(product)} />
                 </Link>
               ))
@@ -199,6 +290,10 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
                 No products found in this category.
               </p>
             )}
+          </div>
+          {/* Phân trang */}
+          <div className="flex justify-center mt-6">
+            {renderPagination()}
           </div>
         </div>
 

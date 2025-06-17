@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { sendChatMessage } from '../utils/api';
+import { sendChatMessage } from '../utils/Api';
 
 const AdminChat = () => {
   const [chatMessages, setChatMessages] = useState([]);

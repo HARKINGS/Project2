@@ -11,3 +11,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* index.css hoặc App.css */
+body {
+  margin: 0;
+  padding-top: 64px; /* Cao bằng chiều cao header (p-4 ~ 16px + text-3xl ~ 48px) */
+  min-height: 100vh;
+  background-color: #f5f7fa; /* Giữ màu nền như giao diện hiện tại */
+}

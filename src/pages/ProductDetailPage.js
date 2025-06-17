@@ -1,38 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const products = [
-  { id: 1, name: 'Laptop Pro', price: 1299.99, category: 'Electronics', stock: 50, description: 'High-performance laptop with 16GB RAM and 1TB SSD.' },
-  { id: 2, name: 'Smartphone X', price: 699.99, category: 'Electronics', stock: 100, description: 'Latest smartphone with 5G and 128GB storage.' },
-  { id: 3, name: 'Running Shoes', price: 89.99, category: 'Fashion', stock: 75, description: 'Comfortable running shoes with breathable fabric.' },
-  { id: 4, name: 'Winter Jacket', price: 149.99, category: 'Fashion', stock: 60, description: 'Warm winter jacket with waterproof coating.' },
-  { id: 5, name: 'Gaming Mouse', price: 49.99, category: 'Electronics', stock: 120, description: 'Ergonomic gaming mouse with customizable buttons.' },
-  { id: 6, name: 'Casual Sneakers', price: 59.99, category: 'Fashion', stock: 90, description: 'Stylish casual sneakers for everyday use.' },
-];
-
 const ProductDetailPage = ({ addToCart }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = products.find((p) => p.id === parseInt(id));
+  const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [comment, setComment] = useState('');
-  const [comments, setComments] = useState([
-    { id: 1, user: 'User1', text: 'Great product!', date: '2025-05-31' },
-    { id: 2, user: 'User2', text: 'Works perfectly!', date: '2025-05-30' },
-  ]);
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
-    if (!product) navigate('/');
-  }, [product, navigate]);
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/web/product/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Thêm token nếu cần
+          },
+        });
+        const data = await response.json();
+        const productData = data.products ? data.products[0] : data; // Điều chỉnh nếu cần
+        setProduct({
+          id: productData.goodsId,
+          name: productData.goodsName,
+          price: productData.price,
+          stock: productData.quantity,
+          description: productData.goodsDescription || 'No description available',
+          category: productData.goodsCategory,
+          imageURL: productData.goodsImageURL || 'https://via.placeholder.com/400x400',
+          brand: productData.goodsBrand,
+          version: productData.goodsVersion,
+        });
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        navigate('/');
+      }
+    };
+
+    fetchProduct();
+  }, [id, navigate]);
 
   const handleAddToCart = () => {
-    addToCart({ ...product, quantity });
-    alert(`${quantity} ${product.name}(s) added to cart!`);
+    if (product && quantity <= product.stock) {
+      addToCart({ ...product, quantity });
+      alert(`${quantity} ${product.name}(s) added to cart!`);
+    }
   };
 
   const handleAddComment = (e) => {
     e.preventDefault();
-    if (comment.trim()) {
+    if (comment.trim() && product) {
       setComments([
         ...comments,
         { id: Date.now(), user: 'CurrentUser', text: comment, date: new Date().toISOString().split('T')[0] },
@@ -42,11 +60,11 @@ const ProductDetailPage = ({ addToCart }) => {
   };
 
   const handleQuantityChange = (e) => {
-    const value = Math.max(1, Math.min(product.stock, parseInt(e.target.value) || 1));
+    const value = Math.max(1, Math.min(product?.stock || 1, parseInt(e.target.value) || 1));
     setQuantity(value);
   };
 
-  if (!product) return <div className="text-center text-gray-500">Product not found.</div>;
+  if (!product) return <div className="text-center text-gray-500">Loading...</div>;
 
   return (
     <div className="container mx-auto py-12 px-4 bg-gray-50 min-h-screen">
@@ -60,7 +78,7 @@ const ProductDetailPage = ({ addToCart }) => {
         <div className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-1/2">
             <img
-              src={`https://via.placeholder.com/400x400?text=${product.name}`}
+              src={product.imageURL}
               alt={product.name}
               className="w-full h-auto rounded-lg"
             />

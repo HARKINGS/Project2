@@ -1,6 +1,11 @@
 import React from 'react';
 
 const OrderHistory = ({ orderHistory }) => {
+  // Kiểm tra nếu orderHistory là mảng rỗng hoặc không hợp lệ
+  if (!Array.isArray(orderHistory)) {
+    return <p className="text-gray-500">No orders yet or data is invalid.</p>;
+  }
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Order History</h1>
@@ -10,8 +15,9 @@ const OrderHistory = ({ orderHistory }) => {
         <div>
           {orderHistory.map((order) => (
             <div key={order.id} className="bg-white p-4 mb-4 rounded-lg shadow">
-              <h2 className="text-xl font-semibold">Order #{order.id}</h2>
+              <h2 className="text-xl font-semibold">Order ID: {order.id}</h2>
               <p className="text-gray-600">Date: {order.date}</p>
+              <p className="text-gray-600">Status: {order.status}</p>
               <ul className="mt-2">
                 {order.items.map((item) => (
                   <li key={item.id} className="flex justify-between">

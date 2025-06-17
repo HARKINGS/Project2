@@ -1,29 +1,43 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const Cart = ({ cartItems, setCartItems, cartCount, setCartCount }) => {
+const Cart = ({ cartItems, setCartItems, cartCount, setCartCount, placeOrder }) => {
   const [selectedItems, setSelectedItems] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
+  const [checkoutData, setCheckoutData] = useState({
+    fullName: '',
     address: '',
-    phone: '',
-    paymentMethod: 'COD',
+    phoneNumber: '',
+    paymentMethod: 'Cash on Delivery',
   });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const products = [
-    { id: 1, name: 'Laptop Pro', price: 1299.99, category: 'Electronics', stock: 50 },
-    { id: 2, name: 'Smartphone X', price: 699.99, category: 'Electronics', stock: 100 },
-    { id: 3, name: 'Running Shoes', price: 89.99, category: 'Fashion', stock: 75 },
-    { id: 4, name: 'Winter Jacket', price: 149.99, category: 'Fashion', stock: 60 },
-    { id: 5, name: 'Gaming Mouse', price: 49.99, category: 'Electronics', stock: 120 },
-    { id: 6, name: 'Casual Sneakers', price: 59.99, category: 'Fashion', stock: 90 },
-  ];
+  const removeFromCart = (productId) => {
+    const updatedCart = cartItems.filter((item) => item.id !== productId);
+    setCartItems(updatedCart);
+    const newCount = updatedCart.reduce((sum, item) => sum + item.quantity, 0);
+    setCartCount(newCount);
+    setSelectedItems((prev) => prev.filter((id) => id !== productId));
+  };
 
-  const handleSelectItem = (itemId) => {
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === productId ? { ...item, quantity: newQuantity } : item
+      )
+    );
+    const newCount = cartItems
+      .map((item) => (item.id === productId ? { ...item, quantity: newQuantity } : item))
+      .reduce((sum, item) => sum + item.quantity, 0);
+    setCartCount(newCount);
+  };
+
+  const handleSelectItem = (productId) => {
     setSelectedItems((prev) =>
-      prev.includes(itemId)
-        ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId]
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
@@ -35,215 +49,154 @@ const Cart = ({ cartItems, setCartItems, cartCount, setCartCount }) => {
     }
   };
 
+  const handleCheckout = async (e) => {
+    e.preventDefault();
+    const selectedProducts = cartItems.filter((item) => selectedItems.includes(item.id));
+    const total = selectedProducts.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    if (selectedProducts.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
+      return;
+    }
+
+    const orderData = {
+      items: selectedProducts.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      total,
+      ...checkoutData,
+    };
+
+    setLoading(true);
+    try {
+      await placeOrder(orderData);
+      setCartItems([]);
+      setCartCount(0);
+      setSelectedItems([]);
+      toast.success('Đặt hàng thành công! Kiểm tra lịch sử đơn hàng.');
+      navigate('/order-history');
+    } catch (error) {
+      toast.error(`Đặt hàng thất bại: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCheckoutData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const selectedTotal = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckout = () => {
-    if (selectedItems.length === 0) {
-      alert('Please select at least one item to checkout!');
-      return;
-    }
-
-    const selectedCartItems = cartItems.filter((item) => selectedItems.includes(item.id));
-    const orderData = {
-      items: selectedCartItems,
-      total: selectedTotal,
-      customer: formData,
-    };
-
-    console.log('Sending order to backend:', orderData);
-    alert('Order placed successfully! (Simulated)');
-    setCartItems(cartItems.filter((item) => !selectedItems.includes(item.id)));
-    setSelectedItems([]);
-  };
-
-  const handleRemoveItem = (itemId) => {
-    const removedItem = cartItems.find((item) => item.id === itemId);
-    setCartItems(cartItems.filter((item) => item.id !== itemId));
-    setSelectedItems(selectedItems.filter((id) => id !== itemId));
-    setCartCount(cartCount - removedItem.quantity);
-  };
-
-  const handleQuantityChange = (itemId, newQuantity) => {
-    const value = Math.max(1, Math.min(
-      products.find((p) => p.id === itemId).stock,
-      parseInt(newQuantity) || 1
-    ));
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: value } : item
-      )
-    );
-    setCartCount((prev) => {
-      const oldItem = cartItems.find((item) => item.id === itemId);
-      return prev - (oldItem.quantity - value);
-    });
-  };
-
   return (
-    <div className="container mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Shopping Cart</h1>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Giỏ hàng</h1>
       {cartItems.length === 0 ? (
-        <p className="text-center text-gray-500">Your cart is empty.</p>
+        <p className="text-gray-500">Giỏ hàng trống.</p>
       ) : (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center mb-4">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.length === cartItems.length}
-                  onChange={handleSelectAll}
-                  className="mr-2"
-                />
-                <label className="text-gray-700 font-medium">Select All</label>
-              </div>
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between border-b py-4">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(item.id)}
-                        onChange={() => handleSelectItem(item.id)}
-                        className="mr-4"
-                      />
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={`https://via.placeholder.com/50x50?text=${item.name}`}
-                          alt={item.name}
-                          className="w-12 h-12 rounded-md"
-                        />
-                        <div>
-                          <Link to={`/product/${item.id}`} className="text-gray-800 hover:underline">
-                            {item.name}
-                          </Link>
-                          <div className="flex items-center gap-2 mt-1">
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                              min="1"
-                              max={products.find((p) => p.id === item.id).stock}
-                              className="w-20 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <button
-                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                              className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-                              disabled={item.quantity <= 1}
-                            >
-                              -
-                            </button>
-                            <button
-                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                              className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-                              disabled={item.quantity >= products.find((p) => p.id === item.id).stock}
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-gray-600 mr-4">${(item.price * item.quantity).toFixed(2)}</span>
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Remove
-                      </button>
-                    </div>
+        <div className="flex space-x-6">
+          <div className="w-2/3">
+            <label className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                checked={selectedItems.length === cartItems.length}
+                onChange={handleSelectAll}
+                className="mr-2"
+              />
+              Chọn tất cả
+            </label>
+            {cartItems.map((item) => (
+              <div key={item.id} className="flex items-center justify-between bg-white p-4 mb-4 rounded-lg shadow">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item.id)}
+                    onChange={() => handleSelectItem(item.id)}
+                    className="mr-2"
+                  />
+                  <img src={`https://placehold.co/50x50?text=${item.name}`} alt={item.name} className="mr-4" />
+                  <div>
+                    <h2 className="text-xl font-semibold">{item.name}</h2>
+                    <p className="text-gray-600">{item.price.toFixed(2)} VNĐ</p>
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 text-right">
-                <p className="text-xl font-semibold text-gray-800">
-                  Total (Selected): ${selectedTotal.toFixed(2)}
-                </p>
-              </div>
-            </div>
-
-            {/* Checkout Form */}
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">Checkout</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="name">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
                 </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="address">
-                    Address
-                  </label>
+                <div className="flex items-center space-x-4">
                   <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                    className="w-16 p-1 border rounded"
                   />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="phone">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="paymentMethod">
-                    Payment Method
-                  </label>
-                  <select
-                    id="paymentMethod"
-                    name="paymentMethod"
-                    value={formData.paymentMethod}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="text-red-500 hover:text-red-700"
                   >
-                    <option value="COD">Cash on Delivery</option>
-                    <option value="CreditCard">Credit Card</option>
-                    <option value="PayPal">PayPal</option>
-                  </select>
+                    Xóa
+                  </button>
                 </div>
+              </div>
+            ))}
+            <a href="/" className="text-blue-500 hover:underline">Quay lại sản phẩm</a>
+          </div>
+          <div className="w-1/3">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-4">Thanh toán</h2>
+              <div>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={checkoutData.fullName}
+                  onChange={handleInputChange}
+                  placeholder="Họ và tên"
+                  className="w-full p-2 mb-4 border rounded"
+                  required
+                />
+                <input
+                  type="text"
+                  name="address"
+                  value={checkoutData.address}
+                  onChange={handleInputChange}
+                  placeholder="Địa chỉ"
+                  className="w-full p-2 mb-4 border rounded"
+                  required
+                />
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={checkoutData.phoneNumber}
+                  onChange={handleInputChange}
+                  placeholder="Số điện thoại"
+                  className="w-full p-2 mb-4 border rounded"
+                  required
+                />
+                <select
+                  name="paymentMethod"
+                  value={checkoutData.paymentMethod}
+                  onChange={handleInputChange}
+                  className="w-full p-2 mb-4 border rounded"
+                >
+                  <option value="Cash on Delivery">Thanh toán khi nhận hàng</option>
+                  <option value="Credit Card">Thẻ tín dụng</option>
+                </select>
+                <p className="mb-4">Tổng (đã chọn): {selectedTotal.toFixed(2)} VNĐ</p>
                 <button
                   onClick={handleCheckout}
-                  className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-300"
+                  className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+                  disabled={loading}
                 >
-                  Place Order
+                  {loading ? 'Đang đặt hàng...' : 'Đặt hàng'}
                 </button>
               </div>
             </div>
           </div>
-          <Link to="/" className="mt-6 inline-block text-blue-600 hover:underline">Back to Products</Link>
-        </>
+        </div>
       )}
     </div>
   );
