@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getAllGoods } from "../api/Goods";
+import { toast } from "react-toastify";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
@@ -36,6 +37,15 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
     { id: 2, name: "Branch Store", location: "Ho Chi Minh City" },
   ];
 
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
@@ -54,15 +64,19 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
             name: p.goodsName,
             price: p.price,
             category: p.goodsCategory,
-            imageURL: p.goodsImageUrl
-              ? `${BASE_URL}${p.goodsImageUrl}`
-              : "https://placehold.co/200x200?text=Image+Not+Available",
+            imageURL:
+              p.goodsImageURL && isValidUrl(p.goodsImageURL)
+                ? p.goodsImageURL
+                : p.goodsImageURL
+                ? `${BASE_URL}${p.goodsImageURL}`
+                : "https://placehold.co/200x200?text=Image+Not+Available",
             stock: p.quantity,
             description: p.goodsDescription || "No description available",
             brand: p.goodsBrand,
             version: p.goodsVersion,
             reviewCount: p.reviews ? p.reviews.length : 0,
           }));
+          console.log("Processed products:", productsWithReviews); // Debug
           setProducts(productsWithReviews);
           setTotalPages(
             Math.ceil(productsWithReviews.length / productsPerPage)
@@ -72,7 +86,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
         }
       } catch (error) {
         console.error("Error fetching products:", error);
-        alert("Failed to load products. Please try again.");
+        toast.error("Không thể tải sản phẩm. Vui lòng thử lại.");
       }
     };
     fetchProducts();
@@ -137,9 +151,12 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
           name: p.goodsName,
           price: p.price,
           category: p.goodsCategory,
-          imageURL: p.goodsImageUrl
-            ? `${BASE_URL}${p.goodsImageUrl}`
-            : "https://placehold.co/200x200?text=Image+Not+Available",
+          imageURL:
+            p.goodsImageURL && isValidUrl(p.goodsImageURL)
+              ? p.goodsImageURL
+              : p.goodsImageURL
+              ? `${BASE_URL}${p.goodsImageURL}`
+              : "https://placehold.co/200x200?text=Image+Not+Available",
           stock: p.quantity,
           description: p.goodsDescription || "No description available",
           brand: p.goodsBrand,
@@ -151,7 +168,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
         setCurrentPage(1);
       } catch (error) {
         console.error("Error searching products:", error);
-        alert("Failed to search products.");
+        toast.error("Không thể tìm kiếm sản phẩm.");
       }
     }
   };
@@ -182,7 +199,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
       };
       setChatBotMessages((prev) => [...prev, botReply]);
     } catch (err) {
-      setBotError("Error sending message. Please try again.");
+      setBotError("Lỗi khi gửi tin nhắn. Vui lòng thử lại.");
       console.error(err);
     } finally {
       setIsBotSending(false);
@@ -215,7 +232,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
       };
       setChatStaffMessages((prev) => [...prev, staffReply]);
     } catch (err) {
-      setStaffError("Error sending message. Please try again.");
+      setStaffError("Lỗi khi gửi tin nhắn. Vui lòng thử lại.");
       console.error(err);
     } finally {
       setIsStaffSending(false);
