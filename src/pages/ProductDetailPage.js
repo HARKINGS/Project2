@@ -1,45 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getGoodsById, getReviewsByGoodsId } from "../api/Goods";
+import { createReview } from "../api/GoodsReview";
+
+const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 const ProductDetailPage = ({ addToCart }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [quantity, setQuantity] = useState(1);
-  const [comment, setComment] = useState('');
-  const [comments, setComments] = useState([]);
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    setLoading(true);
+    setError(null);
+    const fetchProductAndReviews = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/web/product/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Thêm token nếu cần
-          },
-        });
-        const data = await response.json();
-        const productData = data.products ? data.products[0] : data; // Điều chỉnh nếu cần
-        setProduct({
-          id: productData.goodsId,
-          name: productData.goodsName,
-          price: productData.price,
-          stock: productData.quantity,
-          description: productData.goodsDescription || 'No description available',
-          category: productData.goodsCategory,
-          imageURL: productData.goodsImageURL || 'https://via.placeholder.com/400x400',
-          brand: productData.goodsBrand,
-          version: productData.goodsVersion,
-        });
+        const productData = await getGoodsById(id);
+        console.log("API Response in ProductDetailPage:", productData);
+        if (productData && productData.goods) {
+          const goods = productData.goods;
+          setProduct({
+            id: goods.goodsId,
+            name: goods.goodsName || "Unnamed Product",
+            price: goods.price || 0,
+            stock: goods.quantity || 0,
+            description: goods.goodsDescription || "No description available",
+            category: goods.goodsCategory || "Uncategorized",
+            imageURL: goods.goodsImageUrl
+              ? `${BASE_URL}${goods.goodsImageUrl}`
+              : "https://placehold.co/400x400?text=Image+Not+Available",
+            brand: goods.goodsBrand || "Unknown Brand",
+            version: goods.goodsVersion || "1.0",
+          });
+          setReviews(productData.reviews || []);
+        } else {
+          throw new Error("Dữ liệu sản phẩm không hợp lệ hoặc không tìm thấy");
+        }
       } catch (error) {
-        console.error('Error fetching product:', error);
-        navigate('/');
+        console.error("Error fetching product or reviews:", error);
+        setError(
+          error.message || "Không thể tải thông tin sản phẩm hoặc đánh giá"
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProduct();
-  }, [id, navigate]);
+    fetchProductAndReviews();
+  }, [id, navigate, BASE_URL]);
 
   const handleAddToCart = () => {
     if (product && quantity <= product.stock) {
@@ -48,23 +61,56 @@ const ProductDetailPage = ({ addToCart }) => {
     }
   };
 
-  const handleAddComment = (e) => {
+  const handleAddComment = async (e) => {
     e.preventDefault();
     if (comment.trim() && product) {
-      setComments([
-        ...comments,
-        { id: Date.now(), user: 'CurrentUser', text: comment, date: new Date().toISOString().split('T')[0] },
-      ]);
-      setComment('');
+      try {
+        const username = localStorage.getItem("username") || "Anonymous"; // Lấy username từ localStorage
+        const reviewData = {
+          userName: username,
+          content: comment,
+          rating: 0, // Mặc định là 0, có thể thêm input rating sau
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const response = await createReview({ id, reviewData });
+        if (response.code !== 1000) {
+          throw new Error(
+            response.message || "Lỗi không xác định khi tạo bình luận"
+          );
+        }
+        setReviews([...reviews, response.result]);
+        setComment("");
+      } catch (error) {
+        console.error("Error adding review:", error);
+        const errorMessage =
+          error.response?.data?.message ||
+          (error.message.includes("Network Error")
+            ? "Kết nối mạng thất bại"
+            : "Không thể thêm bình luận. Vui lòng thử lại sau.");
+        setError(errorMessage);
+      }
     }
   };
 
   const handleQuantityChange = (e) => {
-    const value = Math.max(1, Math.min(product?.stock || 1, parseInt(e.target.value) || 1));
+    const value = Math.max(
+      1,
+      Math.min(product?.stock || 1, parseInt(e.target.value) || 1)
+    );
     setQuantity(value);
   };
 
-  if (!product) return <div className="text-center text-gray-500">Loading...</div>;
+  if (loading)
+    return <div className="text-center text-gray-500">Loading...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (!product)
+    return (
+      <div className="text-center text-gray-500">Sản phẩm không tồn tại.</div>
+    );
+
+  const formattedPrice =
+    typeof product.price === "number" ? product.price.toFixed(2) : "N/A";
 
   return (
     <div className="container mx-auto py-12 px-4 bg-gray-50 min-h-screen">
@@ -81,15 +127,27 @@ const ProductDetailPage = ({ addToCart }) => {
               src={product.imageURL}
               alt={product.name}
               className="w-full h-auto rounded-lg"
+              onError={(e) => {
+                e.target.src =
+                  "https://placehold.co/400x400?text=Image+Not+Available";
+              }}
             />
           </div>
           <div className="w-full md:w-1/2">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">{product.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+              {product.name}
+            </h1>
             <p className="text-gray-600 mb-4">{product.description}</p>
-            <p className="text-xl font-semibold text-gray-800 mb-4">Price: ${product.price.toFixed(2)}</p>
-            <p className="text-gray-600 mb-4">Stock: {product.stock} units available</p>
+            <p className="text-xl font-semibold text-gray-800 mb-4">
+              Price: ${formattedPrice}
+            </p>
+            <p className="text-gray-600 mb-4">
+              Stock: {product.stock} units available
+            </p>
             <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">Quantity:</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Quantity:
+              </label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -106,7 +164,9 @@ const ProductDetailPage = ({ addToCart }) => {
                   -
                 </button>
                 <button
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  onClick={() =>
+                    setQuantity(Math.min(product.stock, quantity + 1))
+                  }
                   className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
                 >
                   +
@@ -123,14 +183,20 @@ const ProductDetailPage = ({ addToCart }) => {
           </div>
         </div>
 
-        {/* Comments Section */}
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Comments</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Reviews ({reviews.length})
+          </h2>
           <div className="space-y-4 mb-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-gray-100 p-4 rounded-lg">
-                <p className="text-gray-800"><strong>{comment.user}</strong> - {comment.date}</p>
-                <p className="text-gray-600">{comment.text}</p>
+            {reviews.map((review) => (
+              <div key={review.id} className="bg-gray-100 p-4 rounded-lg">
+                <p className="text-gray-800">
+                  <strong>{review.userName}</strong> - {review.createdAt}
+                </p>
+                <p className="text-gray-600">{review.content}</p>
+                <p className="text-yellow-500">
+                  Rating: {"★".repeat(review.rating)}
+                </p>
               </div>
             ))}
           </div>

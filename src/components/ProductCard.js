@@ -1,25 +1,33 @@
-import React from 'react';
+import React from "react";
 
 const ProductCard = ({ product, addToCart }) => {
+  const { id, name, price, imageURL, stock } = product;
+
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl hover:scale-105 transition duration-300">
-      <div className="h-56 bg-gray-100 flex items-center justify-center">
-        <img
-          src={`https://via.placeholder.com/200x200?text=${product.name}`}
-          alt={product.name}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
-        <p className="text-gray-600 font-medium text-xl mb-4">${product.price}</p>
-        <button
-          onClick={() => addToCart(product)}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
-        >
-          Add to Cart
-        </button>
-      </div>
+    <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+      <img
+        src={
+          imageURL || "https://placehold.co/200x200?text=Image+Not+Available"
+        }
+        alt={name}
+        className="w-full h-48 object-cover rounded-md"
+        onError={(e) => {
+          e.target.src =
+            "https://placehold.co/200x200?text=Image+Not+Available";
+        }}
+      />
+      <h3 className="text-lg font-semibold mt-2">{name}</h3>
+      <p className="text-gray-600 mt-1">
+        ${typeof price === "number" ? price.toFixed(2) : "N/A"}
+      </p>
+      <p className="text-gray-500 text-sm">Stock: {stock}</p>
+      <button
+        onClick={() => addToCart(product)}
+        className="mt-2 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
+        disabled={stock <= 0}
+      >
+        Add to Cart
+      </button>
     </div>
   );
 };

@@ -7,7 +7,6 @@ import {
   updateGoodsById,
   deleteGoodsById,
   getGoodsByName,
-  uploadImage,
 } from "../api/Goods";
 
 const AdminProducts = () => {
@@ -21,7 +20,6 @@ const AdminProducts = () => {
     goodsDescription: "",
     goodsCategory: "",
     goodsImageURL: "",
-    imageFile: null,
   });
   const [editProduct, setEditProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +31,7 @@ const AdminProducts = () => {
     setLoading(true);
     try {
       const data = await getAllGoods();
-      console.log("API response from getAllGoods:", data); // Debug log
+      console.log("API response from getAllGoods:", data);
       if (data.code !== 1000) {
         throw new Error(data.message || "Lấy danh sách sản phẩm thất bại");
       }
@@ -69,11 +67,6 @@ const AdminProducts = () => {
         throw new Error("Số lượng không được âm");
       }
 
-      let goodsImageURL = newProduct.goodsImageURL;
-      if (newProduct.imageFile) {
-        goodsImageURL = await uploadImage(newProduct.imageFile);
-      }
-
       const goodsData = {
         goodsName: newProduct.goodsName,
         goodsVersion: newProduct.goodsVersion || undefined,
@@ -81,14 +74,13 @@ const AdminProducts = () => {
         quantity: parseInt(newProduct.quantity),
         goodsBrand: newProduct.goodsBrand || undefined,
         goodsDescription: newProduct.goodsDescription || undefined,
-        goodsCategory: newProduct.goodsCategory || "DefaultCategory", // Fallback
-        goodsImageURL: goodsImageURL || undefined,
+        goodsCategory: newProduct.goodsCategory || "DefaultCategory",
+        goodsImageURL: newProduct.goodsImageURL || undefined,
       };
 
-      console.log("Sending goodsData:", goodsData);
-      const data = await createGoods({ goodsData });
+      const createResponse = await createGoods(goodsData);
       toast.success("Thêm sản phẩm thành công!");
-      await fetchProducts(); // Cập nhật danh sách sau khi thêm
+      await fetchProducts();
       setNewProduct({
         goodsName: "",
         goodsVersion: "",
@@ -98,13 +90,15 @@ const AdminProducts = () => {
         goodsDescription: "",
         goodsCategory: "",
         goodsImageURL: "",
-        imageFile: null,
       });
       setError(null);
     } catch (error) {
       console.error("Lỗi thêm sản phẩm:", error);
       setError(`Thêm sản phẩm thất bại: ${error.message}`);
       toast.error(error.message);
+      if (error.response?.status === 401) {
+        navigate("/login");
+      }
     } finally {
       setLoading(false);
     }
@@ -121,7 +115,6 @@ const AdminProducts = () => {
       goodsDescription: product.goodsDescription || "",
       goodsCategory: product.goodsCategory || "",
       goodsImageURL: product.goodsImageURL || "",
-      imageFile: null,
     });
   };
 
@@ -139,11 +132,6 @@ const AdminProducts = () => {
         throw new Error("Số lượng không được âm");
       }
 
-      let goodsImageURL = editProduct.goodsImageURL;
-      if (editProduct.imageFile) {
-        goodsImageURL = await uploadImage(editProduct.imageFile);
-      }
-
       const updatedData = {
         goodsName: editProduct.goodsName,
         goodsVersion: editProduct.goodsVersion || undefined,
@@ -152,11 +140,11 @@ const AdminProducts = () => {
         goodsBrand: editProduct.goodsBrand || undefined,
         goodsDescription: editProduct.goodsDescription || undefined,
         goodsCategory: editProduct.goodsCategory || "DefaultCategory",
-        goodsImageURL: goodsImageURL || undefined,
+        goodsImageURL: editProduct.goodsImageURL || undefined,
       };
 
-      const data = await updateGoodsById(editProduct.goodsId, updatedData);
-      await fetchProducts(); // Cập nhật danh sách sau khi sửa
+      await updateGoodsById(editProduct.goodsId, updatedData);
+      await fetchProducts();
       setEditProduct(null);
       toast.success("Cập nhật sản phẩm thành công!");
       setError(null);
@@ -164,6 +152,9 @@ const AdminProducts = () => {
       console.error("Lỗi cập nhật sản phẩm:", error);
       setError(`Cập nhật sản phẩm thất bại: ${error.message}`);
       toast.error(error.message);
+      if (error.response?.status === 401) {
+        navigate("/login");
+      }
     } finally {
       setLoading(false);
     }
@@ -174,13 +165,16 @@ const AdminProducts = () => {
       setLoading(true);
       try {
         await deleteGoodsById(goodsId);
-        await fetchProducts(); // Cập nhật danh sách sau khi xóa
+        await fetchProducts();
         toast.success("Xóa sản phẩm thành công!");
         setError(null);
       } catch (error) {
         console.error("Lỗi xóa sản phẩm:", error);
         setError(`Xóa sản phẩm thất bại: ${error.message}`);
         toast.error(error.message);
+        if (error.response?.status === 401) {
+          navigate("/login");
+        }
       } finally {
         setLoading(false);
       }
@@ -200,6 +194,9 @@ const AdminProducts = () => {
       console.error("Lỗi tìm kiếm sản phẩm:", error);
       setError(`Tìm kiếm sản phẩm thất bại: ${error.message}`);
       toast.error(error.message);
+      if (error.response?.status === 401) {
+        navigate("/login");
+      }
     } finally {
       setLoading(false);
     }
@@ -216,32 +213,18 @@ const AdminProducts = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File ảnh quá lớn (tối đa 5MB).");
-        return;
-      }
-      setNewProduct((prev) => ({
-        ...prev,
-        imageFile: file,
-        goodsImageURL: URL.createObjectURL(file),
-      }));
+      const imageUrl = URL.createObjectURL(file);
+      setNewProduct((prev) => ({ ...prev, goodsImageURL: imageUrl }));
     }
   };
 
   const handleEditImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File ảnh quá lớn (tối đa 5MB).");
-        return;
-      }
-      setEditProduct((prev) => ({
-        ...prev,
-        imageFile: file,
-        goodsImageURL: URL.createObjectURL(file),
-      }));
+      const imageUrl = URL.createObjectURL(file);
+      setEditProduct((prev) => ({ ...prev, goodsImageURL: imageUrl }));
     }
   };
 
@@ -339,21 +322,21 @@ const AdminProducts = () => {
           />
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Hình ảnh sản phẩm
+              URL hoặc tải ảnh sản phẩm
             </label>
+            <input
+              type="text"
+              name="goodsImageURL"
+              placeholder="Nhập URL ảnh (từ mạng) hoặc để trống để tải ảnh"
+              value={newProduct.goodsImageURL}
+              onChange={handleInputChange}
+              className="p-3 border rounded-md w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="p-3 border rounded-md w-full mb-2"
-            />
-            <input
-              type="text"
-              name="goodsImageURL"
-              placeholder="Hoặc nhập URL ảnh (tùy chọn)"
-              value={newProduct.goodsImageURL}
-              onChange={handleInputChange}
-              className="p-3 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border rounded-md w-full"
             />
             {newProduct.goodsImageURL && (
               <img
@@ -444,21 +427,21 @@ const AdminProducts = () => {
             />
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hình ảnh sản phẩm
+                URL hoặc tải ảnh sản phẩm
               </label>
+              <input
+                type="text"
+                name="goodsImageURL"
+                placeholder="Nhập URL ảnh (từ mạng) hoặc để trống để tải ảnh"
+                value={editProduct.goodsImageURL}
+                onChange={handleEditInputChange}
+                className="p-3 border rounded-md w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleEditImageChange}
-                className="p-3 border rounded-md w-full mb-2"
-              />
-              <input
-                type="text"
-                name="goodsImageURL"
-                placeholder="Hoặc nhập URL ảnh (tùy chọn)"
-                value={editProduct.goodsImageURL}
-                onChange={handleEditInputChange}
-                className="p-3 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-3 border rounded-md w-full"
               />
               {editProduct.goodsImageURL && (
                 <img
