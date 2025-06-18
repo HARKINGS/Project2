@@ -225,6 +225,7 @@ const ProductDetailPage = () => {
               {product.name}
             </h1>
             <p className="text-gray-600 mb-4">
+              {/* Mô tả sản phẩm */}
               Description: {product.description}
             </p>
             <p className="text-gray-600 mb-4">Brand: {product.brand}</p>
@@ -234,9 +235,11 @@ const ProductDetailPage = () => {
               Price: ${formattedPrice}
             </p>
             <p className="text-gray-600 mb-4">
+              {/* Số lượng sản phẩm */}
               Stock: {product.stock} units available
             </p>
             <div className="mb-4">
+              {/* Số sản phẩm đặt mua */}
               <label className="block text-gray-700 font-medium mb-2">
                 Quantity:
               </label>
