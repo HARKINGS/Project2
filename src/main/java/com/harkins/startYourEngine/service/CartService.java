@@ -165,7 +165,8 @@ public class CartService {
             cart.setVoucher(voucher);
         }
 
-        List<CartItem> updatedCartItems = request.getCartItems().stream().map(itemReq -> {
+        // Cập nhật CartItem trực tiếp trong danh sách hiện tại
+        for (CartItemRequest itemReq : request.getCartItems()) {
             CartItem cartItem = cart.getCartItems().stream()
                     .filter(ci -> ci.getGoods().getGoodsId().equals(itemReq.getGoodsId()))
                     .findFirst()
@@ -178,14 +179,12 @@ public class CartService {
             cartItem.setStatus(CartItemStatus.PLACED);
             goods.setQuantity(goods.getQuantity() - itemReq.getQuantity());
             goodsRepository.save(goods);
-            return cartItem;
-        }).collect(Collectors.toList());
+        }
 
-        cart.setCartItems(updatedCartItems);
-
-        Long totalPrice = updatedCartItems.stream()
+        Long totalPrice = cart.getCartItems().stream()
                 .mapToLong(item -> item.getGoods().getPrice() * item.getQuantity())
                 .sum();
+
         Long totalDiscount = 0L;
         if (voucher != null) {
             voucher.setTotalPriceForDiscount(totalPrice);
@@ -212,14 +211,15 @@ public class CartService {
                 .paymentStatus(cart.getPaymentStatus())
                 .build();
 
-        List<OrderHistoryItem> orderHistoryItems = updatedCartItems.stream().map(item ->
-                OrderHistoryItem.builder()
+        List<OrderHistoryItem> orderHistoryItems = cart.getCartItems().stream()
+                .filter(item -> item.getStatus() == CartItemStatus.PLACED)
+                .map(item -> OrderHistoryItem.builder()
                         .orderHistory(orderHistory)
                         .goods(item.getGoods())
                         .quantity(item.getQuantity())
                         .status(CartItemStatus.PLACED)
-                        .build()
-        ).toList();
+                        .build())
+                .toList();
 
         orderHistory.setOrderHistoryItems(orderHistoryItems);
         orderHistoryRepository.save(orderHistory);

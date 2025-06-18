@@ -2,7 +2,6 @@ package com.harkins.startYourEngine.controller;
 
 import com.harkins.startYourEngine.dto.request.CartRequest;
 import com.harkins.startYourEngine.dto.response.CartResponse;
-import com.harkins.startYourEngine.entity.CartItem;
 import com.harkins.startYourEngine.enums.CartItemStatus;
 import com.harkins.startYourEngine.service.CartService;
 import lombok.AccessLevel;
