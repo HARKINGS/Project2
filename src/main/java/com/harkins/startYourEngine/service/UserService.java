@@ -11,6 +11,7 @@ import com.harkins.startYourEngine.exception.ErrorCode;
 import com.harkins.startYourEngine.mapper.UserMapper;
 import com.harkins.startYourEngine.repository.RoleRepository;
 import com.harkins.startYourEngine.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -98,6 +99,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('DELETE_USER')")
+    @Transactional
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
     }

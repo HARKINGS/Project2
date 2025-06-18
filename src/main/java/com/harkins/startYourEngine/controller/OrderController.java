@@ -58,7 +58,7 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{orderId}/status")
+    @PutMapping("/status/{orderId}")
     public ResponseEntity<?> updateOrderStatus(@PathVariable String orderId, @RequestParam OrderStatus status) {
         try {
             OrderResponse updatedOrder = orderService.updateOrderStatus(orderId, status);
@@ -68,7 +68,7 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{orderId}/payment-status")
+    @PutMapping("/payment-status/{orderId}")
     public ResponseEntity<?> updatePaymentStatus(@PathVariable String orderId, @RequestParam PaymentStatus status) {
         try {
             OrderResponse updatedOrder = orderService.updatePaymentStatus(orderId, status);

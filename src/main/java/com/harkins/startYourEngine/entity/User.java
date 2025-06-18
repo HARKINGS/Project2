@@ -13,6 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "Account")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,7 +24,13 @@ public class User {
     String firstName;
     String lastName;
     LocalDate dob;
+    String phoneNumber;
+    String email;
 
     @ManyToMany
     Set<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<GoodsReview> goodsReviews;
+
 }

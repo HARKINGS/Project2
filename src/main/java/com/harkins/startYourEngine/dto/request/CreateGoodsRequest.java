@@ -1,6 +1,7 @@
 package com.harkins.startYourEngine.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,23 +13,14 @@ import lombok.experimental.FieldDefaults;
 public class CreateGoodsRequest {
     @NotBlank(message = "NOT_EMPTY")
     String goodsName;
-
-    @NotBlank(message = "NOT_EMPTY")
     String goodsVersion;
-
+    @NotNull(message = "NOT_NULL")
     Long quantity;
-
+    @NotNull(message = "NOT_NULL")
     Long price;
-
-    @NotBlank(message = "NOT_EMPTY")
+    String goodsBrand;
     String goodsDescription;
-
     @NotBlank(message = "NOT_EMPTY")
     String goodsCategory;
-
-    @NotBlank(message = "NOT_EMPTY")
-    String goodsBrand;
-
-    @NotBlank(message = "NOT_EMPTY")
-    String goodsImageURL;
+    String goodsImageURL; // Tùy chọn
 }

@@ -18,19 +18,19 @@ import java.util.Objects;
 public class GlobalHandleExeption {
     private static final String MIN_ATTRIBUTE = "min";
 
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
-        ApiResponse apiResponse = new ApiResponse();
-
-        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
-
-        System.out.println(e.toString());
-
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
-
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
-    }
+//    @ExceptionHandler(value = Exception.class)
+//    ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
+//        ApiResponse apiResponse = new ApiResponse();
+//
+//        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
+//
+//        System.out.println(e.toString());
+//
+//        apiResponse.setCode(errorCode.getCode());
+//        apiResponse.setMessage(errorCode.getMessage());
+//
+//        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+//    }
 
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse> handleAppException(AppException e) {

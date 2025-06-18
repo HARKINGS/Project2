@@ -31,6 +31,20 @@ public enum ErrorCode {
     VOUCHER_NOT_FOUND(1018, "Voucher not found!", HttpStatus.NOT_FOUND),
     NOT_EMPTY(1019, "Không được bỏ trống!", HttpStatus.BAD_REQUEST),
     WRONG_ROLE(1020, "Wrong role!", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE(1021, "Kích thước file ảnh quá lớn", HttpStatus.BAD_REQUEST),
+    INTERNAL_SERVER_ERROR(1022, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_EMPTY(1023, "file trống", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1024, "Hàng không đủ", HttpStatus.NOT_FOUND),
+    CART_ITEM_NOT_FOUND(1025, "Sản phẩm này không có trong giỏ hàng", HttpStatus.NOT_FOUND),
+    CART_NOT_FOUND(1026, "Giỏ hàng không tìm thấy", HttpStatus.NOT_FOUND),
+    CART_ITEM_LOCKED(1027, "Đơn hàng đang giao, không thể huỷ", HttpStatus.LOCKED),
+    INVALID_CART_STATUS(1028, "Trạng thái giỏ hàng không hợp lệ", HttpStatus.CONFLICT),
+    VOUCHER_INVALID(1029, "Voucher không hợp lệ", HttpStatus.BAD_REQUEST),
+    INVALID_CART_ITEM_STATUS(1030, "Sản phẩm trong giỏ hàng có trạng thái không hợp lệ", HttpStatus.BAD_REQUEST),
+    CANT_TRADE(1031, "Sản phẩm giá chỉ trong khoảng 1000 đến 50tr mới giao dịch được", HttpStatus.BAD_REQUEST),
+    ORDER_HISTORY_NOT_FOUND(1032, "Đơn hàng không tìm thấy", HttpStatus.NOT_FOUND),
+    MOMO_SIGNATURE_ERROR(1033, "Chữ lý MOMO lỗi", HttpStatus.BAD_REQUEST),
+    INVALID_PAYMENT_METHOD(1034, "Lỗi phương thức thanh toán", HttpStatus.BAD_REQUEST),
     ;
 
     int code;

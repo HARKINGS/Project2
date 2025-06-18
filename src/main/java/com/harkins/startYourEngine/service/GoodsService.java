@@ -12,6 +12,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -120,5 +122,20 @@ public class GoodsService {
     public List<GoodsResponse> getGoodsByBrand(String goodsBrand) {
         List<Goods> goodsList = goodsRepository.findByGoodsBrand(goodsBrand);
         return goodsList.stream().map(goodsMapper::toGoodsResponse).collect(Collectors.toList());
+    }
+
+    // Thêm phân trang
+    @PreAuthorize("hasAuthority('GET_ALL_GOODS')")
+    public Page<GoodsResponse> getGoods(Pageable pageable) {
+        return goodsRepository.findAll(pageable)
+                .map(goodsMapper::toGoodsResponse);
+    }
+
+    @PreAuthorize("hasAuthority('UPDATE_GOODS_IMAGE')")
+    public void updateGoodsImage(String goodsId, String imageUrl) {
+        Goods goods = goodsRepository.findById(goodsId)
+                .orElseThrow(() -> new AppException(ErrorCode.GOODS_NOT_FOUND));
+        goods.setGoodsImageURL(imageUrl);
+        goodsRepository.save(goods);
     }
 }

@@ -1,5 +1,6 @@
 package com.harkins.startYourEngine.dto.request;
 
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -23,6 +24,11 @@ public class UpdateUserRequest {
 
 //    @DobConstraint(min = 18, message = "INVALID_DOB")
     LocalDate dob;
+
+    @Size(min = 10, max = 10)
+    String phoneNumber;
+
+    String email;
 
     List<String> roles;
 }

@@ -17,7 +17,9 @@ public class GoodsReview {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    String userName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goods_id", nullable = false)

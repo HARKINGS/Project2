@@ -116,13 +116,6 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    // @PreAuthorize("hasAuthority('GET_CURRENT_USERORDERS')")
-    // public List<OrderResponse> getCurrentUserOrders() {
-    //     UserResponse user = userService.getMyInfo();
-    //     List<Order> orders = orderRepo.findByUser_UserId(user.getUserId());
-    //     return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
-    // }
-
     @PreAuthorize("hasAuthority('UPDATE_ORDER_STATUS')")
     @Transactional
     public OrderResponse updateOrderStatus(String orderId, OrderStatus status) throws NotFoundException {

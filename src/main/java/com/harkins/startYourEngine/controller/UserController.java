@@ -4,6 +4,7 @@ import com.harkins.startYourEngine.dto.request.CreateUserRequest;
 import com.harkins.startYourEngine.dto.request.UpdateUserRequest;
 import com.harkins.startYourEngine.dto.response.ApiResponse;
 import com.harkins.startYourEngine.dto.response.UserResponse;
+import com.harkins.startYourEngine.service.GoodsReviewService;
 import com.harkins.startYourEngine.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     UserService userService;
+    GoodsReviewService goodsReviewService;
 
     @PostMapping("/{roleType}")
     ApiResponse<UserResponse> createUser(
@@ -63,7 +65,9 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     ApiResponse<String> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
+        goodsReviewService.deleteGoodsReviewByUserId(userId); // Xóa review trước
+        userService.deleteUser(userId); // Rồi mới xóa user
         return ApiResponse.<String>builder().result("User has been deleted").build();
     }
+
 }

@@ -4,6 +4,11 @@ server:
     context-path: /web
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
   application:
     name: webHitech
   datasource:
@@ -60,9 +65,32 @@ jwt:
 
 # ZaloPay configuration
 zalopay:
-  app-id: 2554
+  appId: 2554
   key1: sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn
   key2: trMrHtvjo6myautxDUiAcYsVtaeQ8nhf
   endpoint: https://sb-openapi.zalopay.vn/v2/create
   orderstatus: https://sb-openapi.zalopay.vn/v2/query
   callback-url: https://1ac8-42-113-215-72.ngrok-free.app/zalopay/callback
+  returnUrl: http://yourdomain.com/payment/zalopay-return
+
+momo:
+  partnerCode: MOMO
+  returnUrl: http://localhost:3000/
+  endpoint: https://test-payment.momo.vn/v2/gateway/api/
+  ipnUrl: http://localhost:8080/web/momo/ipn-handler
+  accessKey: F8BBA842ECF85
+  secretKey: K951B6PE1waDMi640xX08PD3vg6EkVlz
+  notifyUrl: http://yourdomain.com/payment/momo-notify
+  requestType: captureWallet
+
+vnpay:
+  endpoint: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  tmnCode: YOUR_VNPAY_TMN_CODE
+  hashSecret: YOUR_VNPAY_HASH_SECRET
+  returnUrl: http://yourdomain.com/payment/vnpay-return
+
+mb:
+  bank:
+    endpoint: https://api.mb.com.vn/qr/generate
+  accountNumber: YOUR_MB_BANK_ACCOUNT_NUMBER
+

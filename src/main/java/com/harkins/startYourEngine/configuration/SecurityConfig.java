@@ -25,7 +25,7 @@ import java.util.Set;
 @EnableMethodSecurity
 public class SecurityConfig {
     private static final String[] ALL_METHOD_PUBLIC_ENDPOINTS = {"/orders/**", "/zalopay/**"};
-    private static final String[] POST_PUBLIC_ENDPOINTS = {"/auth/**", "/reviews/create"};
+    private static final String[] POST_PUBLIC_ENDPOINTS = {"/auth/**", "/reviews/create", "/users/**"};
     private static final String[] GET_PUBLIC_ENDPOINTS = {"/goods/**", "/reviews", "/vouchers", "/vouchers/**"};
 
     @Autowired
@@ -43,6 +43,7 @@ public class SecurityConfig {
             "GET_GOODS_BY_RATING",
             "GET_GOODS_SORTED",
             "GET_VOUCHER",
+            "UPDATE_REVIEWS",
             "GET_ALL_VOUCHERS",
             "CREATE_REVIEWS",
             "GET_ALL_REVIEWS",
@@ -59,6 +60,7 @@ public class SecurityConfig {
             "GET_ORDERS_BY_USERID",
             "GET_ORDER_STATUS",
             "CREATE_ORDER",
+            "CREATE_USER",
             "UPDATE_ORDER_TRANSACTIONID");
 
     @Bean
@@ -97,7 +99,9 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.addAllowedOrigin("*");
+//        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
 

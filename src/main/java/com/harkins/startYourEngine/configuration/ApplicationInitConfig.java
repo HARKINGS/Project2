@@ -16,6 +16,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,12 @@ import java.util.stream.Collectors;
 @Configuration
 @Slf4j
 public class ApplicationInitConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
     PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -62,6 +69,7 @@ public class ApplicationInitConfig {
         addPermission("DELETE_REVIEWS", "Delete goods review");
 
         //        GoodsService
+        addPermission("UPDATE_GOODS_IMAGE", "Update images for Goods");
         addPermission("CREATE_GOODS", "Create a goods");
         addPermission("GET_GOODS_BY_RATING", "Lọc hàng hóa theo đánh giá");
         addPermission("GET_GOODS_SORTED", "Sắp xếp hàng hóa theo tên");
@@ -123,43 +131,13 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         log.info("Initializing application.....");
         return args -> {
-            //            initPermission();
-            if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) { // chưa có tk admin
-                initPermission();
+            initPermission();
 
-                Set<String> userPermissions = Set.of(
-                        "GET_REVIEWS_BY_GOODS",
-                        "GET_ALL_GOODS",
-                        "GET_GOODS_BY_ID",
-                        "GET_GOODS_BY_NAME",
-                        "GET_GOODS_BY_CATEGORY",
-                        "GET_GOODS_BY_BRANCH",
-                        "GET_GOODS_BY_PRICE_RANGE",
-                        "GET_GOODS_BY_PRICE",
-                        "GET_GOODS_BY_RATING",
-                        "GET_GOODS_SORTED",
-                        "GET_VOUCHER",
-                        "GET_ALL_VOUCHERS",
-                        "CREATE_REVIEWS",
-                        "GET_ALL_REVIEWS",
-                        "GET_REVIEWS_BY_ID",
-                        "PLACE_ORDER",
-                        "DELETE_ORDER",
-                        "UPDATE_ORDERITEM",
-                        "GET_ORDER_BY_ID",
-                        "GET_CURRENT_USERORDERS",
-                        "UPDATE_ORDER_STATUS",
-                        "UPDATE_PAYMENT_STATUS",
-                        "GET_ALL_ORDERS",
-                        "GET_ORDERS_BY_STATUS",
-                        "GET_ORDERS_BY_USERID",
-                        "GET_ORDER_STATUS",
-                        "CREATE_ORDER",
-                        "UPDATE_ORDER_TRANSACTIONID");
-
+            if(roleRepository.findById("STAFF").isEmpty()) {
                 Set<String> staffPermissions = Set.of(
                         "CHECK_TOKEN",
                         "REFRESH_TOKEN",
+                        "UPDATE_GOODS_IMAGE",
                         "CREATE_GOODS",
                         "GET_ALL_GOODS",
                         "GET_GOODS_BY_ID",
@@ -194,21 +172,58 @@ public class ApplicationInitConfig {
                         "CREATE_ORDER",
                         "UPDATE_ORDER_TRANSACTIONID");
 
-                Set<String> adminPermissions = permissionRepository.findAll().stream()
-                        .map(Permission::getName)
-                        .collect(Collectors.toSet());
+                roleRepository.save(Role.builder()
+                        .name(PredefinedRole.STAFF)
+                        .description("Staff role")
+                        .permissions(getPermissionsByNames(staffPermissions))
+                        .build());
+            }
+
+            if (roleRepository.findById("USER").isEmpty()) {
+                Set<String> userPermissions = Set.of(
+                        "GET_REVIEWS_BY_GOODS",
+                        "GET_ALL_GOODS",
+                        "GET_GOODS_BY_ID",
+                        "GET_GOODS_BY_NAME",
+                        "GET_GOODS_BY_CATEGORY",
+                        "GET_GOODS_BY_BRANCH",
+                        "GET_GOODS_BY_PRICE_RANGE",
+                        "GET_GOODS_BY_PRICE",
+                        "GET_GOODS_BY_RATING",
+                        "GET_GOODS_SORTED",
+                        "GET_VOUCHER",
+                        "GET_ALL_VOUCHERS",
+                        "CREATE_REVIEWS",
+                        "GET_ALL_REVIEWS",
+                        "GET_REVIEWS_BY_ID",
+                        "UPDATE_REVIEWS",
+                        "PLACE_ORDER",
+                        "DELETE_ORDER",
+                        "UPDATE_ORDERITEM",
+                        "GET_ORDER_BY_ID",
+                        "GET_CURRENT_USERORDERS",
+                        "UPDATE_ORDER_STATUS",
+                        "UPDATE_PAYMENT_STATUS",
+                        "GET_ALL_ORDERS",
+                        "GET_ORDERS_BY_STATUS",
+                        "GET_ORDERS_BY_USERID",
+                        "GET_ORDER_STATUS",
+                        "CREATE_ORDER",
+                        "UPDATE_ORDER_TRANSACTIONID");
 
                 roleRepository.save(Role.builder()
                         .name(PredefinedRole.USER)
                         .description("User role")
                         .permissions(getPermissionsByNames(userPermissions))
                         .build());
+            }
 
-                roleRepository.save(Role.builder()
-                        .name(PredefinedRole.STAFF)
-                        .description("Staff role")
-                        .permissions(getPermissionsByNames(staffPermissions))
-                        .build());
+            if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) { // chưa có tk admin
+                initPermission();
+
+                Set<String> adminPermissions = permissionRepository.findAll().stream()
+                        .map(Permission::getName)
+                        .collect(Collectors.toSet());
 
                 Role adminRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ADMIN)

@@ -6,6 +6,9 @@ import com.harkins.startYourEngine.dto.response.ApiResponse;
 import com.harkins.startYourEngine.dto.response.GoodsDetailsResponse;
 import com.harkins.startYourEngine.dto.response.GoodsResponse;
 import com.harkins.startYourEngine.dto.response.GoodsReviewResponse;
+import com.harkins.startYourEngine.exception.AppException;
+import com.harkins.startYourEngine.exception.ErrorCode;
+import com.harkins.startYourEngine.service.FileStorageService;
 import com.harkins.startYourEngine.service.GoodsReviewService;
 import com.harkins.startYourEngine.service.GoodsService;
 import jakarta.validation.Valid;
@@ -14,35 +17,34 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-@RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Slf4j
-@Builder
+@RestController
 @RequestMapping("/goods")
+@Slf4j
 public class GoodsController {
-
     GoodsService goodsService;
     GoodsReviewService goodsReviewService;
+    FileStorageService fileStorageService;
 
     @GetMapping("/details/{goodsId}")
     public ResponseEntity<?> getGoodsWithReviews(@PathVariable("goodsId") String goodsId) {
         try {
-            // Lấy thông tin sản phẩm
             GoodsResponse goods = goodsService.getGoodsById(goodsId);
-
-            // Lấy danh sách đánh giá
             List<GoodsReviewResponse> reviews = goodsReviewService.getReviewByGoods(goodsId);
-
-            // Tạo đối tượng chứa cả sản phẩm và đánh giá
             GoodsDetailsResponse response = new GoodsDetailsResponse(goods, reviews);
-
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error retrieving goods details: {}", e.getMessage());
@@ -51,17 +53,66 @@ public class GoodsController {
         }
     }
 
-    @PostMapping
-    ApiResponse<GoodsResponse> createGoods(@Valid @RequestBody CreateGoodsRequest request) {
-        return ApiResponse.<GoodsResponse>builder()
-                .result(goodsService.createGoods(request))
-                .build();
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ApiResponse<GoodsResponse> createGoods(@RequestBody @Valid CreateGoodsRequest request) {
+        log.info("Received goods: {}", request);
+        try {
+            GoodsResponse result = goodsService.createGoods(request);
+            return ApiResponse.<GoodsResponse>builder()
+                    .code(1000)
+                    .result(result)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error creating goods: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
+
+//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ApiResponse<List<String>> uploadImages(
+//            @RequestParam(value = "goodsId", required = false) String goodsId,
+//            @RequestParam("images") MultipartFile[] images) {
+//        log.info("Received images for goodsId: {}", goodsId);
+//        try {
+//            if (images == null || images.length == 0) {
+//                throw new AppException(ErrorCode.FILE_EMPTY);
+//            }
+//            List<String> imageUrls = new ArrayList<>();
+//            for (MultipartFile image : images) {
+//                if (image.isEmpty()) {
+//                    throw new AppException(ErrorCode.FILE_EMPTY);
+//                }
+//                if (image.getSize() > 5 * 1024 * 1024) {
+//                    throw new AppException(ErrorCode.FILE_TOO_LARGE);
+//                }
+//                String imageUrl = fileStorageService.uploadFile(image);
+//                imageUrls.add(imageUrl);
+//            }
+//            // Nếu có goodsId, cập nhật ảnh chính
+//            if (goodsId != null) {
+//                goodsService.updateGoodsImage(goodsId, imageUrls.getFirst());
+//            }
+//            return ApiResponse.<List<String>>builder()
+//                    .code(1000)
+//                    .result(imageUrls)
+//                    .build();
+//        } catch (Exception e) {
+//            log.error("Error uploading images: {}", e.getMessage(), e);
+//            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
     @GetMapping("/all-goods")
     ApiResponse<List<GoodsResponse>> getGoods() {
         return ApiResponse.<List<GoodsResponse>>builder()
                 .result(goodsService.getGoods())
+                .build();
+    }
+
+    @GetMapping("/page")
+    public ApiResponse<Page<GoodsResponse>> getGoodsPage(Pageable pageable) {
+        return ApiResponse.<Page<GoodsResponse>>builder()
+                .result(goodsService.getGoods(pageable))
                 .build();
     }
 
@@ -141,12 +192,5 @@ public class GoodsController {
     ApiResponse<String> deleteGoods(@PathVariable("goodsId") String goodsId) {
         goodsService.deleteGoods(goodsId);
         return ApiResponse.<String>builder().result("Goods deleted").build();
-    }
-
-    @GetMapping("/{goodsId}/reviews")
-    public ApiResponse<List<GoodsReviewResponse>> getGoodsReviews(@PathVariable("goodsId") String goodsId) {
-        return ApiResponse.<List<GoodsReviewResponse>>builder()
-                .result(goodsReviewService.getReviewByGoods(goodsId))
-                .build();
     }
 }

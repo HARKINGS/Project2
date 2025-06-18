@@ -12,7 +12,8 @@ import org.mapstruct.MappingTarget;
 public interface GoodsReviewMapper {
     GoodsReview toReview(CreateGoodsReviewRequest request);
 
-    @Mapping(target = "userName", source = "userName")
+    @Mapping(target = "userName", source = "user.username")
+    @Mapping(target = "goodsId", source = "goods.goodsId")
     GoodsReviewResponse toReviewResponse(GoodsReview goodsReview);
 
     void updateReviewResponse(

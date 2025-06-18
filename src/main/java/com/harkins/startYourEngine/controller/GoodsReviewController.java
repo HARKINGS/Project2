@@ -22,17 +22,19 @@ import java.util.List;
 public class GoodsReviewController {
     GoodsReviewService goodsReviewService;
 
-    @PostMapping("/create")
-    public ApiResponse<GoodsReviewResponse> createReview(@Valid @RequestBody CreateGoodsReviewRequest request) {
+    @PostMapping("/create/{goodsId}")
+    public ApiResponse<GoodsReviewResponse> createReview(
+            @PathVariable("goodsId") String goodsId,
+            @Valid @RequestBody CreateGoodsReviewRequest request) {
         return ApiResponse.<GoodsReviewResponse>builder()
-                .result(goodsReviewService.createReview(request.getGoodsId(), request))
+                .result(goodsReviewService.createReview(goodsId, request))
                 .build();
     }
 
-    @GetMapping("/{reviewId}")
-    public ApiResponse<GoodsReviewResponse> getReviewById(@PathVariable("reviewId") String reviewId) {
-        return ApiResponse.<GoodsReviewResponse>builder()
-                .result(goodsReviewService.getReviewById(reviewId))
+    @GetMapping("/{goodsId}")
+    public ApiResponse<List<GoodsReviewResponse>> getReviewByGoodsId(@PathVariable("goodsId") String goodsId) {
+        return ApiResponse.<List<GoodsReviewResponse>>builder()
+                .result(goodsReviewService.getReviewByGoods(goodsId))
                 .build();
     }
 

@@ -11,7 +11,9 @@ import java.util.List;
 public interface GoodsReviewRepository extends JpaRepository<GoodsReview, String> {
     List<GoodsReview> findByGoods_GoodsId(String goodsId);
 
-    boolean existsByGoodsAndUserName(Goods goods, String userName);
+    boolean existsByGoodsAndUser_Username(Goods goods, String userName);
+
+    void deleteByUser_UserId(String userId);
 
 //    List<Goods> findGoodsByRating(double rating);
 }
