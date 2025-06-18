@@ -1,5 +1,6 @@
 package com.harkins.startYourEngine.service;
 
+import com.harkins.startYourEngine.dto.request.CartItemRequest;
 import com.harkins.startYourEngine.dto.request.CartRequest;
 import com.harkins.startYourEngine.dto.response.CartResponse;
 import com.harkins.startYourEngine.entity.*;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +40,6 @@ public class CartService {
     OrderHistoryMapper orderHistoryMapper;
     UserRepository userRepository;
 
-    // Hàm ánh xạ String sang PaymentMethod
     private PaymentMethod mapToPaymentMethod(String paymentMethodStr) {
         if (paymentMethodStr == null) {
             throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD);
@@ -72,12 +73,11 @@ public class CartService {
                         Cart newCart = Cart.builder()
                                 .user(user)
                                 .status(CartStatus.PENDING)
-                                .cartItems(new ArrayList<>()) // Khởi tạo cartItems
+                                .cartItems(new ArrayList<>())
                                 .build();
                         return cartRepository.save(newCart);
                     });
 
-            // Đảm bảo cartItems không null
             if (cart.getCartItems() == null) {
                 cart.setCartItems(new ArrayList<>());
             }
@@ -92,21 +92,21 @@ public class CartService {
                 log.info("Voucher applied: {}", request.getVoucherId());
             }
 
-            List<CartItem> cartItems = request.getCartItems().stream().flatMap(itemReq -> {
+            // Cập nhật hoặc thêm CartItem vào danh sách hiện tại
+            for (CartItemRequest itemReq : request.getCartItems()) {
                 Goods goods = goodsRepository.findById(itemReq.getGoodsId())
                         .orElseThrow(() -> new AppException(ErrorCode.GOODS_NOT_FOUND));
                 if (itemReq.getQuantity() > goods.getQuantity()) {
                     throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
                 }
 
-                CartItem existingItem = cart.getCartItems().stream()
+                Optional<CartItem> existingItemOpt = cart.getCartItems().stream()
                         .filter(ci -> ci.getGoods().getGoodsId().equals(itemReq.getGoodsId()))
-                        .findFirst()
-                        .orElse(null);
+                        .findFirst();
 
-                if (existingItem != null) {
+                if (existingItemOpt.isPresent()) {
+                    CartItem existingItem = existingItemOpt.get();
                     existingItem.setQuantity(existingItem.getQuantity() + itemReq.getQuantity());
-                    return List.of(existingItem).stream();
                 } else {
                     CartItem newItem = CartItem.builder()
                             .cart(cart)
@@ -114,19 +114,18 @@ public class CartService {
                             .quantity(itemReq.getQuantity())
                             .status(CartItemStatus.PENDING)
                             .build();
-                    return List.of(newItem).stream();
+                    cart.getCartItems().add(newItem);
                 }
-            }).collect(Collectors.toList());
+            }
 
-            cart.setCartItems(cartItems);
             cart.setShippingAddress(request.getShippingAddress());
-            cart.setPaymentMethod(mapToPaymentMethod(request.getPaymentMethod())); // Chuyển đổi String sang PaymentMethod
+            cart.setPaymentMethod(mapToPaymentMethod(request.getPaymentMethod()));
             cart.setVoucher(voucher);
             cart.setPaymentStatus(PaymentStatus.PENDING);
             cart.setReceiverName(request.getReceiverName());
             cart.setPhoneNumber(request.getPhoneNumber());
 
-            Long totalPrice = cartItems.stream()
+            Long totalPrice = cart.getCartItems().stream()
                     .mapToLong(item -> item.getGoods().getPrice() * item.getQuantity())
                     .sum();
             Long totalDiscount = 0L;
@@ -156,7 +155,7 @@ public class CartService {
         }
 
         cart.setShippingAddress(request.getShippingAddress());
-        cart.setPaymentMethod(mapToPaymentMethod(request.getPaymentMethod())); // Chuyển đổi String sang PaymentMethod
+        cart.setPaymentMethod(mapToPaymentMethod(request.getPaymentMethod()));
         cart.setReceiverName(request.getReceiverName());
         cart.setPhoneNumber(request.getPhoneNumber());
         Voucher voucher = null;
@@ -204,7 +203,7 @@ public class CartService {
                 .user(cart.getUser())
                 .voucher(voucher)
                 .shippingAddress(cart.getShippingAddress())
-                .paymentMethod(cart.getPaymentMethod().toString()) // Lưu dưới dạng String nếu cần
+                .paymentMethod(cart.getPaymentMethod().toString())
                 .totalPrice(totalPrice)
                 .totalDiscount(totalDiscount)
                 .status(CartStatus.SHIPPING)
@@ -308,7 +307,7 @@ public class CartService {
                         Cart newCart = Cart.builder()
                                 .user(user)
                                 .status(CartStatus.PENDING)
-                                .cartItems(new ArrayList<>()) // Khởi tạo cartItems
+                                .cartItems(new ArrayList<>())
                                 .build();
                         return cartRepository.save(newCart);
                     });
