@@ -1,38 +1,43 @@
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-const token = localStorage.getItem("token"); // Lấy token từ localStorage
+// Lấy token từ localStorage (giả sử token được lưu dưới key 'token')
+const getToken = () => localStorage.getItem("token");
 
 // Tạo đánh giá sản phẩm
 export const createReview = async (reviewData) => {
+  const token = getToken();
   if (!token) {
     throw new Error("No token found. Please log in first.");
   }
+
   try {
     const response = await axios.post(
-      `${BASE_URL}/reviews/create`,
-      reviewData,
+      `${BASE_URL}/reviews/create/${reviewData.goodsId}`, // Sửa BASE_URL để khớp với backend
+      {
+        content: reviewData.content,
+        rating: reviewData.rating || 1, // Mặc định rating là 1 thay vì 0 để tuân thủ @Min(1)
+      },
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Gửi token để xác thực
+          Authorization: `Bearer ${token}`,
         },
       }
     );
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || "Review creation failed");
-    return data;
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(response.data.message || "Review creation failed");
+    }
+    return response.data;
   } catch (error) {
     console.error("Review creation error:", error);
-    throw error;
+    throw error.response?.data?.message || error.message || "An error occurred";
   }
 };
 
 // Lấy danh sách đánh giá sản phẩm
 export const getAllReviews = async () => {
-  // if (!token) {
-  //     throw new Error('No token found. Please log in first.');
-  // }
   try {
     const response = await axios.get(`${BASE_URL}/reviews`, {
       headers: {
@@ -72,27 +77,34 @@ export const getReviewsByGoodsId = async (goodsId) => {
   }
 };
 
-// Cập nhật đánh giá sản phẩm
 export const updateReview = async (reviewId, reviewData) => {
+  const token = getToken();
   if (!token) {
     throw new Error("No token found. Please log in first.");
   }
+
   try {
+    console.log("Updating review with data:", reviewData); // Log dữ liệu gửi đi
     const response = await axios.put(
       `${BASE_URL}/reviews/${reviewId}`,
-      reviewData,
+      {
+        content: reviewData.content,
+        rating: reviewData.rating,
+      },
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Gửi token để xác thực
+          Authorization: `Bearer ${token}`,
         },
       }
     );
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || "Review update failed");
-    return data;
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(response.data.message || "Review update failed");
+    }
+    return response.data;
   } catch (error) {
     console.error("Review update error:", error);
-    throw error;
+    throw error.response?.data?.message || error.message || "An error occurred";
   }
 };

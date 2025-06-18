@@ -95,7 +95,6 @@ const AdminStaff = () => {
       }
 
       // Thông báo hiển thị trên giao diện tạo tài khoản thành công
-      toast.success("Tài khoản đã được thêm thành công!");
 
       await fetchUsers(); // Cập nhật danh sách sau khi thêm
       setNewUser({

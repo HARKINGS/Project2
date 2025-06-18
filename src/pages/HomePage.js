@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getAllGoods } from "../api/Goods";
 import { toast } from "react-toastify";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
-const HomePage = ({ addToCart, cartItems, setCartItems }) => {
+const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const productsPerPage = 8;
-  const navigate = useNavigate();
   const [currentBanner, setCurrentBanner] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,7 +75,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
             version: p.goodsVersion,
             reviewCount: p.reviews ? p.reviews.length : 0,
           }));
-          console.log("Processed products:", productsWithReviews); // Debug
+          console.log("Processed products:", productsWithReviews);
           setProducts(productsWithReviews);
           setTotalPages(
             Math.ceil(productsWithReviews.length / productsPerPage)
@@ -318,10 +317,7 @@ const HomePage = ({ addToCart, cartItems, setCartItems }) => {
             {currentProducts.length > 0 ? (
               currentProducts.map((product) => (
                 <Link to={`/product/${product.id}`} key={product.id}>
-                  <ProductCard
-                    product={product}
-                    addToCart={() => addToCart(product)}
-                  />
+                  <ProductCard product={product} />
                 </Link>
               ))
             ) : (
