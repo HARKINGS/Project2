@@ -253,9 +253,14 @@ const Cart = () => {
         toast.info("Tạo giỏ hàng mới để đặt hàng.");
       }
 
+      // Thay thế đoạn if (checkoutData.paymentMethod === "MOMO") { ... } tại dòng ~274-280
       if (checkoutData.paymentMethod === "MOMO") {
         const momoResponse = await createMomoPayment(cartRequest, cartData.id);
+        console.log("MoMo response:", momoResponse); // Debug response
         if (momoResponse.resultCode === 0) {
+          if (!momoResponse.qrCodeUrl && !momoResponse.payUrl) {
+            throw new Error("Không nhận được QR code hoặc URL thanh toán MoMo");
+          }
           setQrCodeUrl(momoResponse.qrCodeUrl || momoResponse.payUrl);
           setOrderId(momoResponse.orderId);
           setCartId(cartData.id);
@@ -287,6 +292,8 @@ const Cart = () => {
         toast.error("Sản phẩm trong giỏ hàng không tồn tại!");
       } else if (error.message.includes("INSUFFICIENT_STOCK")) {
         toast.error("Sản phẩm không đủ số lượng tồn kho!");
+      } else if (error.message.includes("CANT_TRADE")) {
+        toast.error("Giá trị đơn hàng vượt quá 50 triệu đồng!");
       } else {
         toast.error(
           `Đặt hàng thất bại: ${error.message || "Lỗi không xác định"}`

@@ -17,10 +17,11 @@ export const createMomoPayment = async (cartRequest, cartId) => {
       cartRequest,
       getConfig()
     );
-    if (response.data.code !== 1000) {
-      throw new Error(response.data.message || "Tạo mã QR MoMo thất bại");
+    const data = response.data;
+    if (data.resultCode !== 0) {
+      throw new Error(data.message || "Lỗi khi tạo mã QR MoMo");
     }
-    return { ...response.data, cartId };
+    return data; // Trả về payUrl, qrCodeUrl, v.v.
   } catch (error) {
     console.error("Lỗi khi tạo mã QR MoMo:", error);
     if (error.response?.status === 401) {

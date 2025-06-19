@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getAllGoods } from "../api/Goods";
 import { toast } from "react-toastify";
@@ -316,9 +316,7 @@ const HomePage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {currentProducts.length > 0 ? (
               currentProducts.map((product) => (
-                <Link to={`/product/${product.id}`} key={product.id}>
-                  <ProductCard product={product} />
-                </Link>
+                <ProductCard product={product} key={product.id} />
               ))
             ) : (
               <p className="col-span-full text-center text-gray-500 text-lg">
