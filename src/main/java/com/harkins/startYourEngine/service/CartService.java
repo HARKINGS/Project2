@@ -172,18 +172,29 @@ public class CartService {
                     .findFirst()
                     .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
             Goods goods = cartItem.getGoods();
+
+            // Kiểm tra hàng tồn kho
             if (itemReq.getQuantity() > goods.getQuantity()) {
                 throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
             }
             cartItem.setQuantity(itemReq.getQuantity());
             cartItem.setStatus(CartItemStatus.PLACED);
             goods.setQuantity(goods.getQuantity() - itemReq.getQuantity());
+
+            if (goods.getQuantity() < 0) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+
             goodsRepository.save(goods);
         }
 
         Long totalPrice = cart.getCartItems().stream()
                 .mapToLong(item -> item.getGoods().getPrice() * item.getQuantity())
                 .sum();
+
+        if (totalPrice > 50_000_000) {
+            throw new AppException(ErrorCode.CANT_TRADE);
+        }
 
         Long totalDiscount = 0L;
         if (voucher != null) {
